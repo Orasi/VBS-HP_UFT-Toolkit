@@ -1,0 +1,377 @@
+'Author: Adam Thomas
+'Purpose: To load a file into a known resource
+'Modfied By:
+Function QCSetResource(resourceFolderId,fileType,fileName,ParentPath)
+    'On Error Resume Next
+    Set TDConn = QCUtil.QCConnection
+    Set resourceFolderFactory = TDConn.QCResourceFolderFactory
+    Set resourceFolder = resourceFolderFactory.Item(resourceFolderId)
+    Set resourceFactory = resourceFolder.QCResourceFactory
+    Set currResourceList = resourceFactory.NewList("")
+    For ItemCount = 1 To currResourceList.Count
+        currItem = currResourceList.Item(ItemCount).Name
+        If UCase(currItem) = UCase(fileName) Then
+            Set resourceItem = currResourceList.Item(ItemCount)
+            resourceFound = True
+            Exit For
+        End If
+    Next
+    If Not resourceFound Then
+
+        Set resourceItem = resourceFactory.AddItem(CStr(fileName))
+        resourceItem. ResourceType= fileType
+        resourceItem.fileName = fileName
+        resourceItem.Post
+
+        Set currResourceList = resourceFactory.NewList("")
+        For ItemCount = 1 To currResourceList.Count
+            currItem = currResourceList.Item(ItemCount).Name
+             currItemID = currResourceList.Item(ItemCount).ID
+            If UCase(currItem) = UCase(fileName) Then
+                resourceFound = True
+                ID = currItemID
+                Set CI = currResourceList.Item(ItemCount)
+                Exit For
+            End If
+        Next
+        If resourceFound Then
+    		Set resourceItem = Nothing
+            Set currResourceList = Nothing
+		    Set TDConn = Nothing
+		    Set resourceFolderFactory = Nothing
+		    Set resourceFolder = Nothing
+		    Set resourceFactory = Nothing
+		    Set currResourceList = Nothing
+			Wait(2)
+            CI.Filename = fileName
+            CI.ResourceType= fileType
+            CI.Post
+            Wait(1)
+            CI.VC.CheckOut ""          
+			Wait(1)
+            CI.UploadResource ParentPath, True
+            Wait(2)
+            CI.VC.CheckIn "Automated check-in by utility"  & Now()
+        Else
+             Reporter.ReportEvent micFail, "Resource Upload", "Resource could not be uploaded."
+        End If
+    Else
+        resourceItem.vC.CheckOut ""
+        Set testResourceStorage = resourceItem
+        ID = resourceItem.ID
+        testResourceStorage.UploadResource ParentPath, False
+        resourceItem.vC.CheckIn "Automated check-in by utility" & Now()
+    End If
+    Set resourceItem = Nothing
+              Set currResourceList = Nothing
+		    Set TDConn = Nothing
+		    Set resourceFolderFactory = Nothing
+		    Set resourceFolder = Nothing
+		    Set resourceFactory = Nothing
+		    Set currResourceList = Nothing
+  	QCSetResource = ID
+End Function
+
+'Author: Adam Thomas
+'Purpose: Uploads an attachment to the current test
+'Modfied By:
+Function UploadAttachment(FilePath)
+	Set ObjCurrentTest = QCUtil.CurrentTestSetTest.Attachments
+	Set ObjAttch = ObjCurrentTest.AddItem(Null)
+	ObjAttch.FileName = FilePath
+	ObjAttch.Type = 1
+	ObjAttch.Post
+	ObjAttch.Refresh
+End Function
+
+'Author: Adam Thomas
+'Purpose: To return the ALM Test id for the test currently executing
+'Modfied By:
+Function GetCurrentTestID()
+	Set CurrenttestID = QCUtil.CurrentTest
+	GetCurrentTestID = CurrenttestID.ID
+End Function
+
+'Author: Adam Thomas
+'Purpose: Uploads a file to a given resource ID. Resource path is the full path including file name and extension. 
+'Modfied By:
+Public  Function UploadResource(ResourcePath,ResourceID)  
+   'Declare
+    Dim aName
+	Dim FoundBool
+	Dim oTDC
+	Dim oResourceFactory
+	Dim oRoot
+	Dim oSub
+	Dim iTotalItems
+	Dim ItemCtr
+	Dim CurItem
+	Dim FileName
+
+	'Checks QC connectivity
+	If NOT(QCUtil.isConnected) Then
+		Reporter.ReportEvent micFail, "Not Connected to QC", "QTP isn't connected to QC and can't download the file"
+		QCImport = False
+		Exit Function
+	End If
+
+	'Set QC objs
+	Set oTDC = QCUtil.QCConnection
+	Set oResourceFactory = oTDC.QCResourceFactory
+	Set oRoot = oResourceFactory.NewList("")
+	Set oSub = Nothing
+	FoundBool = False
+
+	'Find resource
+	iTotalItems = oRoot.Count
+	For ItemCtr = 1 To iTotalItems
+		CurItem = oRoot.Item(ItemCtr).ID
+
+		'If ID matches then grab resource
+		If CStr(CurItem) = CStr(ResourceID) Then
+			Set oSub = oRoot.Item(ItemCtr)
+			FoundBool = True
+			Exit For
+		End If
+	Next
+
+	'Clean
+	Set oRoot = Nothing
+	Set oResourceFactory = Nothing
+	Set oTDC = Nothing
+
+	'Check for assignment
+	If FoundBool = True Then
+		'Set name
+		aName = Split(ResourcePath, "\")
+		ResourcePath = Replace(ResourcePath,"\"&aName(uBound(aName)),"")
+		oSub.FileName = aName(uBound(aName))
+		On Error Resume Next
+			oSub.ResourceType = "Test Resource"
+		On Error GoTo 0
+		oSub.Post
+		oSub.UploadResource ResourcePath, True 
+		Reporter.ReportEvent micDone, "Resource Uploaded", "Resource ID: "&ResourceID
+	Else
+		Reporter.ReportEvent micFail, "Resource Not Found", "Resource ID: "&ResourceID&" not found in ALM."
+	End If
+End Function
+
+
+'Author: Adam Thomas
+'Purpose: Downloads an attachment from any test to a local/network path
+'Modfied By:
+Public Function DownloadAttachmentFromTest(ByVal TestID, ByVal FileName, ByVal OutPath)
+	If InStr(FileName, "\") > 0 Then
+		DownloadAttachmentFromTest = CopyFile(FileName, "Temp")
+	Else
+		Dim TDConnection
+		Set TDConnection = QCUtil.TDConnection
+	
+		Dim TestList
+		Set TestList = TDConnection.TestFactory.NewList("SELECT * FROM TEST WHERE TS_TEST_ID = " & TestID)
+	
+		' For use with test name: Set TestList = TDConnection.TestFactory.NewList("SELECT * FROM TEST WHERE TS_NAME = '" & TestName & "'")
+	
+		If UCase(OutPath) = "TEMP" Then
+			OutPath = GetSystemTempFolder
+		End If
+		
+		DownloadAttachmentFromTest = GetAttachmentFromTestObject(TestList(1), FileName, OutPath)
+	End If
+End Function
+
+'Author: Adam Thomas
+'Purpose: 
+'Modfied By:
+Public Function RenameAttachmentFromTest(ByVal TestID, ByVal CurrentAttachmentName, ByVal NewAttachmentName)
+
+	TempPath = GetSystemTempFolder()
+	SuccessFlag = FALSE
+	'create tep dir
+	CreateTempFolder(TempPath)
+
+	'pull down file
+	TempAttachmentPath = DownloadAttachmentFromTest(TestID, CurrentAttachmentName, TempPath)
+
+	If TempAttachmentPath <> "" Then
+			
+		'rename file
+		NewPath = RenameFile(TempPath & CurrentAttachmentName, NewAttachmentName)
+		
+		'delete from test plan
+		RemoveAttachmentFromTest TestID, CurrentAttachmentName
+		 
+		'upload renamed to test plan
+		UploadAttachmentToTest TestID, NewPath 
+		
+		'delete local
+		DeleteFileByPath(NewPath)
+		
+		SuccessFlag = TRUE
+		
+	End If
+	RenameAttachmentFromTest = SuccessFlag
+		
+End Function
+
+'Author: Adam Thomas
+'Purpose: Downloads an attachment from an ALM object
+'Modfied By:
+Public Function GetAttachmentFromTestObject(ByRef Object, ByVal FileName, ByVal OutPath)
+Dim strRetVal
+strRetVal = ""
+
+Dim AttachmentFactory, AttachmentList
+Set AttachmentFactory = Object.Attachments
+Set AttachmentList = AttachmentFactory.NewList("")
+
+'Ensure path ends with "\"
+If Right(OutPath, 1) <> "\" Then
+OutPath = OutPath & "\"
+End If
+
+Dim Attachment, LongFileName, ExtendedStorage
+For Each Attachment In AttachmentList
+If StrComp(Attachment.Name(1), FileName, 1) = False Then ' Equal
+LongFileName = Attachment.Name 'Actual ServerFileName of attachment in QC.
+Set ExtendedStorage = Attachment.AttachmentStorage
+ExtendedStorage.ClientPath = OutPath
+ExtendedStorage.Load LongFileName, True
+
+Dim objFSO
+Set objFSO = CreateObject("Scripting.FileSystemObject")
+DeleteFileByPath OutPath & FileName
+objFSO.CopyFile OutPath & LongFileName, OutPath & FileName, True
+DeleteFileByPath OutPath & LongFileName
+strRetVal = OutPath & FileName
+
+Set objFSO = Nothing
+Exit For
+End If
+Next
+
+GetAttachmentFromTestObject = strRetVal
+End Function
+
+'Author: Adam Thomas
+'Purpose: Uploads an attachment to any test from a local/network path
+'Modfied By:
+Public Function UploadAttachmentToTest(ByVal TestID, ByVal LocalPath)
+
+	Dim TDConnection
+	Set TDConnection = QCUtil.TDConnection
+	Dim TestList
+	FilePath = LocalPath
+
+	Set TestList = TDConnection.TestFactory.NewList("SELECT * FROM TEST WHERE TS_TEST_ID = " & TestID)
+
+' For use with test name: Set TestList = TDConnection.TestFactory.NewList("SELECT * FROM TEST WHERE TS_NAME = '" & TestName & "'")
+	
+	Set ObjAttch = TestList(1).Attachments 
+	Set Attacher = ObjAttch.AddItem(null)
+	
+	Attacher.FileName = FilePath
+	Attacher.Type = 1
+	Attacher.Post
+	Attacher.Refresh
+
+End Function
+
+'Author: Adam Thomas
+'Purpose: Gets the name of the test from the test ID
+'Modfied By:
+Public Function GetTestNameFromID(ALMTestID)
+	Dim TDConnection
+	Set TDConnection = QCUtil.TDConnection
+	Dim TestList
+	Set TestList = TDConnection.TestFactory.NewList("SELECT * FROM TEST WHERE TS_TEST_ID = " & ALMTestID )
+	GetTestNameFromID = TestList(1).Name
+End Function
+
+'Author: Adam Thomas
+'Purpose: Removes an attachment from any test
+'Modfied By:
+Public Function RemoveAttachmentFromTest(ByVal TestID, ByVal Filename)
+
+	Dim TDConnection
+	Set TDConnection = QCUtil.TDConnection
+	Dim TestList
+	FilePath = LocalPath
+	SuccessFlag = False
+	Set TestList = TDConnection.TestFactory.NewList("SELECT * FROM TEST WHERE TS_TEST_ID = " & TestID)
+	' For use with test name: Set TestList = TDConnection.TestFactory.NewList("SELECT * FROM TEST WHERE TS_NAME = '" & TestName & "'")
+	Set ObjAttch = TestList(1).Attachments 
+	Set attchList = ObjAttch.NewList("")
+
+	For each attch in attchList
+		If attch.name(1) = Filename Then
+			Set objTempAtch = attch
+			SuccessFlag = True
+		End If
+	Next
+
+	If SuccessFlag Then
+		objAttch.RemoveItem(objTempAtch.ID)
+	End If
+
+	RenameAttachmentInTest = SuccessFlag
+
+End Function
+
+
+'Author: Adam Thomas
+'Purpose: Downloads a resource by resource ID
+'Modfied By:
+Function QCGetResource(resourceID)
+
+	On Error Resume Next
+	Set qcConn = QCUtil.QCConnection
+	Set oResource = qcConn.QCResourceFactory
+
+	Set oFilter = oResource.Filter
+	  oFilter.Filter("RSC_ID") = resourceID
+	Set oResourceList = oFilter.NewList
+
+	Set objShell = CreateObject("WScript.Shell")
+	Set colEnvironment = objShell.Environment("PROCESS")
+	
+	
+	objPath = GetSystemTempFolder()
+
+	If oResourceList.Count = 1 Then
+		If objPath <> "" Then
+			Set oFile = oResourceList.Item(1)
+			oFile.DownloadResource objPath, True
+			Reporter.ReportEvent micDone, "Resource Download", "Resource ID: '" & resourceID & "' File Path: '" & objPath
+		Else
+			Reporter.ReportEvent micFail, "ALM Resource Error", "Temp Path: '" & objPath & "' does not exist or cannot be found."
+			ExistTestIteration
+		End If
+	Else
+		Reporter.ReportEvent micFail, "ALM Resource Error", "Resource ID: " & resourceID & " does not exist or cannot be found."
+		ExistTestIteration
+	End If
+
+	QCGetResource = objPath & "\" & oFile.FileName
+	
+	Set qcConn = Nothing
+	Set oResource = Nothing
+	Set oFilter = Nothing
+	Set oFlieList = Nothing
+	Set oFile = Nothing
+
+	On Error GoTo 0
+
+End Function
+
+'Author: Adam Thomas
+'Purpose: Returns the name of a test with a given test ID. 
+'Modfied By:
+Public Function GetTestNameFromID(ALMTestID)
+	Dim TDConnection
+	Set TDConnection = QCUtil.TDConnection
+	Dim TestList
+	Set TestList = TDConnection.TestFactory.NewList("SELECT * FROM TEST WHERE TS_TEST_ID = " & ALMTestID )
+	GetTestNameFromID = TestList(1).Name
+End Function
