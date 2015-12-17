@@ -1,0 +1,255 @@
+'**********************************************************************
+' Function Name:	 GetLatestDownload
+' Author:					 Adam Thomas
+' Purpose:					
+' Prerequisites:		
+'**********************************************************************
+Function GetLatestDownload()
+	Set WshShell = CreateObject("WScript.Shell")
+	UFolder = WshShell.ExpandEnvironmentStrings("%USERPROFILE%")
+	Set WshShell = Nothing
+
+	DPath = UFolder &"\Downloads"
+	
+	set oFolder=createobject("scripting.filesystemobject").getfolder(DPath)
+	If oFolder.Files.Count < 1 Then
+		GetLatestDownload = "No Files in downloads folder"
+	Else	
+
+	For Each aFile In oFolder.Files
+		If sNewest = "" Then
+			Set fNewest = aFile
+			sNewest = aFile.Name
+		Else
+			If fNewest.DateCreated < aFile.DateCreated Then
+				Set fNewest = aFile
+			End If
+		End If
+	Next
+
+	GetLatestDownload = DPath & "\" & fNewest.Name
+		End If
+	
+End Function
+
+'**********************************************************************
+' Function Name:	 FileSize
+' Author:					 Adam Thomas
+' Purpose:					
+' Prerequisites:		
+'**********************************************************************
+Function FileSize(FilePath)
+	Set FileSys = CreateObject("Scripting.FileSystemObject")
+	FileSize = FileSys.GetFile(FilePath).Size
+End Function
+
+'**********************************************************************
+' Function Name:	 DeleteFileByPath
+' Author:					 Adam Thomas
+' Purpose:					
+' Prerequisites:		
+'**********************************************************************
+Function DeleteFileByPath(FilePath)
+	Set FileSys = CreateObject("Scripting.FileSystemObject") 
+	If FileSys.FileExists(FilePath) Then
+	   FileSys.DeleteFile FilePath 
+	End If
+End Function
+
+'**********************************************************************
+' Function Name:	 CreateTempFolder
+' Author:					 Adam Thomas
+' Purpose:					
+' Prerequisites:		
+'**********************************************************************
+Function CreateTempFolder(FolderPath)
+	Set FileSys=CreateObject("Scripting.FileSystemObject")
+	If Not FileSys.FolderExists(FolderPath) Then
+	   newfolder = FileSys.CreateFolder (FolderPath)
+	End If
+	CreateTempFolder = FolderPath
+End Function
+
+'**********************************************************************
+' Function Name:	 CreateTempFolder
+' Author:					 Adam Thomas
+' Purpose:					
+' Prerequisites:		
+'**********************************************************************
+Function GetSystemTempFolder()
+	Const TemporaryFolder = 2
+ 	Set fso = CreateObject("Scripting.FileSystemObject")
+	GetSystemTempFolder = fso.GetSpecialFolder(TemporaryFolder)
+End Function
+
+'**********************************************************************
+' Function Name:	 GetChildFolders
+' Author:					 Adam Thomas
+' Purpose:					
+' Prerequisites:		
+'**********************************************************************
+Function GetChildFolders(ParentFolderPath)
+	Set FileSys=CreateObject("Scripting.FileSystemObject")
+	Set objFolder = FileSys.GetFolder(ParentFolderPath)
+	Set objSubFolders = objFolder.SubFolders
+	For Each objSubFolder in objSubFolders
+		   FolderList = objSubFolder.Name & "~" & FolderList
+	Next
+	GetChildFolders = Split(FolderList, "~")
+End Function
+
+
+'**********************************************************************
+' Function Name:	 GetUserProfilePath
+' Author:					 Adam Thomas
+' Purpose:					
+' Prerequisites:		
+'**********************************************************************
+Function GetUserProfilePath()
+	Set objShell = CreateObject("WScript.Shell")
+	GetUserProfilePath = objShell.ExpandEnvironmentStrings ("%USERPROFILE%")
+End Function
+
+'**********************************************************************
+' Function Name:	 AddToHostFile
+' Author:					 Adam Thomas
+' Purpose:					
+' Prerequisites:		
+'**********************************************************************
+Function AddToHostFile (IPAddress, WebAddress)
+
+	Const ForReading = 1, ForWriting = 2, ForAppending = 8, ReadOnly = 1
+	Set fso = CreateObject("Scripting.FileSystemObject")
+	Set WshShell=CreateObject("WScript.Shell")
+	WinDir =WshShell.ExpandEnvironmentStrings("%WinDir%")
+	HostsFile = WinDir & "\System32\Drivers\etc\Hosts"
+	
+	Set objFSO = CreateObject("Scripting.FileSystemObject")
+	Set objFile = objFSO.OpenTextFile(HostsFile, ForReading)
+	
+	Do Until objFile.AtEndOfStream
+		If InStr (objFile.ReadLine, IPAddress) <> 0 Then
+			Exit Function
+		End If
+		i = i + 1
+	Loop
+
+	objFile.Close
+	Set objFSO = CreateObject("Scripting.FileSystemObject")
+	Set objFile = objFSO.GetFile(HostsFile)
+	If objFile.Attributes AND ReadOnly Then
+	objFile.Attributes = objFile.Attributes XOR ReadOnly
+	End If
+	Set filetxt = fso.OpenTextFile(HostsFile, ForAppending, True)
+	filetxt.WriteLine(vbNewLine & IPAddress & "     " & WebAddress )
+	filetxt.Close
+End Function
+
+'**********************************************************************
+' Function Name:	 CopyFileByFullPath
+' Author:			 Adam Thomas
+' Purpose:					
+' Prerequisites:		
+'**********************************************************************
+Function CopyFileByFullPath (FromPath, ToPath)
+	Set objFSO = CreateObject("Scripting.FileSystemObject")
+	objFSO.CopyFile FromPath, ToPath, True
+End Function
+
+'**********************************************************************
+' Function Name:	 CopyFile
+' Author:			 Adam Thomas
+' Purpose:					
+' Prerequisites:		
+'**********************************************************************
+Public Function CopyFile(CurrentPath, CopiedToPath)
+	ReportingOff
+	If UCase(CopiedToPath) = "TEMP" or UCase(CopiedToPath) = "" Then
+		CopiedToPath = CreateTempFolder("C:\Temp\UFT\")
+	End If
+	Dim FileSys
+	Set FileSys = CreateObject("Scripting.FileSystemObject")
+	FileSys.CopyFile CurrentPath, CopiedToPath
+	Set FileSys = nothing
+	CopyFile = CopiedToPath & GetFileNameFromPath(CurrentPath)
+	ReportingOn
+End Function
+
+'**********************************************************************
+' Function Name:	 MoveFile
+' Author:			 Adam Thomas
+' Purpose:					
+' Prerequisites:		
+'**********************************************************************
+Function MoveFile(OrigionalPath, NewPath)
+	Set FileSys = CreateObject("Scripting.FileSystemObject") 
+	FileSys.MoveFile OrigionalPath, NewPath
+End Function
+
+'**********************************************************************
+' Function Name:	 RenameFile
+' Author:			 Adam Thomas
+' Purpose:					
+' Prerequisites:		
+'**********************************************************************
+Function RenameFile(FullPath, NewName)
+	Set FileSys = CreateObject("Scripting.FileSystemObject") 
+	Path = Replace(FullPath, Split(FullPath, "\")(Ubound(Split(FullPath, "\"))), "")
+	DeleteFileByPath(Path & NewName)
+	FileSys.MoveFile FullPath, Path & NewName
+	RenameFile = Path & NewName
+End Function
+
+
+'**********************************************************************
+' Function Name:	 GetLatestDownload
+' Author:					 Adam Thomas
+' Purpose:					
+' Prerequisites:		
+'**********************************************************************
+Function GetLatestDownloadFilePath()
+	aDPath = Split(GetLatestDownload, "\")
+	For a = 0 To UBound(aDPath) - 1 Step 1
+		Path = Path & aDPath(a) & "\"
+	Next
+	GetLatestDownloadFilePath = Path
+End Function
+
+
+'**********************************************************************
+' Function Name:	 GetLatestDownload
+' Author:					 Adam Thomas
+' Purpose:					
+' Prerequisites:		
+'**********************************************************************
+Function GetLatestDownloadFileName()
+	aDPath = Split(GetLatestDownload, "\")
+	GetLatestDownloadFileName = aDPath(Ubound(aDPath))
+End Function
+
+
+Function GetFileNameFromPath(FullPath)
+	aPath = Split(FullPath, "\")
+	GetFileNameFromPath = aPath(Ubound(aPath))
+End Function
+
+Function GetPathFromFullPath(FullPath)
+	aDPath = Split(FullPath, "\")
+	For a = 0 To UBound(aDPath) - 1 Step 1
+		Path = Path & aDPath(a) & "\"
+	Next
+	GetPathFromFullPath = Path
+End Function
+
+Function GetFileExtension(PathOrFileName)
+	aPath = Split(PathOrFileName, ".")
+	GetFileExtension = "." & aPath(Ubound(aPath))
+End Function
+
+Function AddUIDToFile(FullPath)
+	UID = "UID" & UniqueNumber(7)
+	FileName = GetFileNameFromPath(FullPath)
+	Path = GetPathFromFullPath(FullPath)
+	Ext = GetFileExtension(FullPath)
+	AddUIDToFile = RenameFile(FullPath, Replace(FileName, Ext, " " & UID) & Ext)
+End Function
