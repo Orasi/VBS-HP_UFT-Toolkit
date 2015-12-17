@@ -1,0 +1,565 @@
+﻿Dim objExcel
+Dim objWorkbook
+Dim objSheet
+
+Public Function InstantiateExcel(FilePath, Sheet)
+	Dim OE
+	Set OE = New Excel
+	OE.Instantiate FilePath, Sheet
+	Set InstantiateExcel = OE
+	Set OE = Nothing
+End Function
+
+
+
+Class Excel
+    Private objExcel
+	Private objWorkbook
+	Private objSheet
+	
+	Private Sub Class_Initialize
+  ' Statements go here.
+	End Sub
+	
+	Function ConvertToLetter(mycolumn)
+		If mycolumn > 26 Then
+		Mcl = Chr(Int((mycolumn - 1) / 26) + 64) & Chr(Int((mycolumn - 1) Mod 26) + 65)
+		Else
+		Mcl = Chr(mycolumn + 64)
+		End If
+		ConvertToLetter = Mcl
+	End Function
+	
+	Function ConvertToNumber(InputLetter)
+		InputLetter = Trim(InputLetter)
+		Leng = Len(InputLetter)
+		OutputNumber = 0
+		For i = 1 To Leng
+		   OutputNumber = (Asc(UCase(Mid(InputLetter, i, 1))) - 64) + OutputNumber * 26
+		Next 
+		ConvertToNumber = OutputNumber   'Output the corresponding number
+	End Function
+
+
+	
+	Public Function Instantiate(FilePath, Sheet)
+	   	Set objExcel = CreateObject("Excel.Application")
+		objExcel.Visible = False
+		'Supress any warnings
+		objExcel.Application.DisplayAlerts = False
+		'Open source file
+		Set objWorkbook = objExcel.Workbooks.Open(FilePath)
+		'Find Cell containing search string
+		If Sheet <> "" Then
+			objWorkbook.sheets(Sheet).Activate
+		End If
+		Set objSheet = objWorkbook.ActiveSheet
+	End Function
+	
+	Public Function Find(SearchString, Range, RowOrCol)
+		Set r = objExcel.Range(Range).Find(SearchString)
+		On Error Resume Next
+			RC = r.Row & "," & r.Column
+		On Error GoTo 0
+		If RC <> "" Then
+	        Select Case UCase(RowOrCol)
+			Case "ROW"
+				Find = r.Row
+			Case "COL"
+				Find = r.Column
+			Case Else
+				Find = RC
+			End Select
+		Else 
+			Reporter.ReportEvent micWarning, "Excel Find Function", "Excel could not find a value of: " & SearchString & " in the given range of: " & Range
+	    	Find = 0
+		End If
+	End Function
+	
+	Public Function ReturnRangeOfValues(Range)
+		ReturnRangeOfValues = objExcel.Range(Range).Value
+	End Function
+	
+	Public Function FindFirstEmptyRow(ColumnLetter)
+		Range = UCase(ColumnLetter) & "1:" & UCase(ColumnLetter) & 64000
+		Set r = objExcel.Range(Range).Find("")
+    	FindFirstEmptyRow = r.Row
+	End Function
+	
+	Public Function FindFirstEmptyCol(RowNumber)
+		Range = UCase(ColumnLetter) & "1:" & UCase(ColumnLetter) & 64000
+		Range = "A" & RowNumber & ":" & "ZZ" & RowNumber
+		Set r = objExcel.Range(Range).Find("")
+    	FindFirstEmptyCol = r.Column
+	End Function
+	
+	Function GetCellData(Row, Col)
+		If CStr(Col) <> "0" and CStr(Row) <> "0" Then
+			GetCellData = objSheet.Cells(Row, Col).Value
+		Else
+			GetCellData = ""
+		End If
+	End Function
+	
+	
+	Public Function GetByColumnName(Row, ColumnName)
+		Col = Find(ColumnName, "A1:ZZ1", "Col")
+		GetByColumnName = GetCellData(Row, Col)
+	End Function
+	
+	Public Function CompareColumns(SourceColumn, TargetColumn, StartRow, ShouldMatchTrueFalse)
+		SFER = FindFirstEmptyRow(SourceColumn)
+		TFER = FindFirstEmptyRow(TargetColumn)
+		
+		If SFER = TFER and SFER <= StartRow Then
+			reporter.ReportEvent micPass, "No data to compare.", "No data in source column: " & SourceColumn & " or target column: " & TargetColumn 
+		Else
+			AllClear = True
+			
+			If UCase(ShouldMatch) = "TRUE" Then
+				SummaryString = "Comparing Source Column: " & SourceColumn & " with Target Column: " & TargetColumn & ML(2) _
+				& "Column data should match." & ML(2)
+			Else
+				SummaryString = "Comparing Source Column: " & SourceColumn & " with Target Column: " & TargetColumn & ML(2) _
+				& "Column data should not match." & ML(2)
+			End If
+			
+			RowsQty = SFER - StartRow
+			EndRow = (StartRow + RowsQty) - 1
+			For r = StartRow To EndRow Step 1
+				SourceData = GetCellData(r, ConvertToNumber(SourceColumn))
+				TargetData = GetCellData(r, ConvertToNumber(TargetColumn))
+				If UCase(ShouldMatch) = "TRUE" Then
+					If SourceData = TargetData Then
+						SummaryString = SummaryString & L & "ROW " & r & " PASS - " & SourceData & " = " & TargetData
+					Else
+						SummaryString = SummaryString & L & "ROW " & r & " FAIL - " & SourceData & " <> " & TargetData
+						AllClear = False
+					End If
+				Else
+					If SourceData <> TargetData Then
+						SummaryString = SummaryString & L & "ROW " & r & " PASS - " & SourceData & " <> " & TargetData
+					Else
+						SummaryString = SummaryString & L & "ROW " & r & " FAIL - " & SourceData & " = " & TargetData
+						AllClear = False
+					End If
+				End If
+			Next
+			
+			If AllClear Then
+				reporter.ReportEvent micPass, "Column Comparison", SummaryString
+			Else
+				reporter.ReportEvent micFail, "Column Comparison", SummaryString
+			End If
+		End If
+	End Function
+	
+
+	
+	Public Function Destruct()
+		objWorkbook.Close
+		Set objExcel = Nothing
+		Set objWorkbook = Nothing
+		Set objSheet = Nothing
+	End Function
+	
+	
+End Class
+
+
+
+Public Function CompareSheets(SourceFilePath, SourceSheet, TargetFilePath, TargetSheet, EndRowNumber, EndColumnLetter, IgnoreCells)
+	StartTime = Timer
+	
+	Set oSource = InstantiateExcel(SourceFilePath, SourceSheet)
+	Set oTarget = InstantiateExcel(TargetFilePath, TargetSheet)
+	
+	CompareRange = "A1:" & EndColumnLetter & EndRowNumber
+	
+	SROV = oSource.ReturnRangeOfValues(CompareRange)
+	TROV = oTarget.ReturnRangeOfValues(CompareRange)
+	
+	AllClear = True
+	FailsSummary = ""
+	CheckCount = 0
+	FailCount = 0
+	
+	LoadBar "ON", "Report Comparison", CInt(ConvertToNumber(EndColumnLetter))
+
+	For c = 1 To ConvertToNumber(EndColumnLetter) Step 1
+		LoadStep
+		For r = 1 To EndRowNumber Step 1
+			SourceData = SROV(r, c)
+			TargetData = TROV(r, c)
+			CheckCount = CheckCount + 1
+			If SourceData <> TargetData Then
+				Loc = ConvertToLetter(c) & ":" & r
+				If InStr(IgnoreCells, Loc) > 0 Then
+					FailsSummary = FailsSummary & "-PASS-" & L _
+					& "Cells did not match, but were not supposed to." & L _
+					& "Location =  " & Loc & L _
+					& "Source Data = " & SourceData & L _
+					& "Target Data = " & TargetData & L _
+					& ML(2)
+				Else
+					FailCount = FailCount + 1
+					FailsSummary = FailsSummary & "-FAIL-" & L _
+					& "Location =  " & Loc & L _
+					& "Source Data = " & SourceData & L _
+					& "Target Data = " & TargetData & L _
+					& ML(2)
+					AllClear = False
+				End If
+
+			End If
+		Next
+	Next
+
+	EndTime = Timer
+	
+	If AllClear Then
+		Reporter.ReportEvent micPass, "Reports Compared", "Source Report: " _
+		& GetFileNameFromPath(SourceFilePath) & L & "Target Report: " _
+		& GetFileNameFromPath(TargetFilePath) & L &  "Cells Checked: " & CheckCount & ML(2) _
+		& FailsSummary _
+		& ML(2) & "Time to test (in seconds): " & Round(EndTime - StartTime,2) 
+	Else
+		Reporter.ReportEvent micFail, "Reports Compared", "Source Report: " _
+		& GetFileNameFromPath(SourceFilePath) & L & "Target Report: " _
+		& GetFileNameFromPath(TargetFilePath) & L & "Cells Checked: " & CheckCount & L _
+		& "Cells that did not match: " & FailCount & ML(2) _
+		& FailsSummary _
+		& ML(2) & "Time to test (in seconds): " & Round(EndTime - StartTime,2)
+	End If
+	
+	LoadBar "OFF", "", ""
+	oSource.Destruct
+	oTarget.Destruct
+	
+End Function
+
+
+'-------------------------------------------OLD Excel Functions------------------------------
+
+'**********************************************************************
+' Function Name:	  	ExcellFind
+' Author:						Adam Thomas
+' Purpose:					Returns a cell location, as an R,C e.g 5,3 or E,3 , for the given search. 
+'							Example of range would be: A1:ZZ1 for top row or A1:ZZ10000 for whole sheet or C1:C10000 for a column
+' Prerequisites:		
+'**********************************************************************
+Function ExcelFind(FilePath, Sheet, SearchString, Range, RowOrCol)
+	Set objExcel = CreateObject("Excel.Application")
+	objExcel.Visible = False
+	'Supress any warnings
+	objExcel.Application.DisplayAlerts = False
+	'Open source file
+	Set objWorkbook = objExcel.Workbooks.Open(FilePath)
+	If Sheet <> "" Then
+		objWorkbook.sheets(Sheet).Activate
+	End If
+'	Find Cell containing search string
+	Set r = objExcel.Range(Range).Find(SearchString)
+	On Error Resume Next
+		RC = r.Row & "," & r.Column
+	On Error GoTo 0
+	If RC <> "" Then
+        Select Case UCase(RowOrCol)
+		Case "ROW", "R"
+			ExcelFind = r.Row
+		Case "COL", "C", "COLUMN"
+			ExcelFind = r.Column
+		Case Else
+			ExcelFind = RC
+		End Select
+	Else 
+    	ExcelFind = 0
+	End If
+	objWorkbook.Close
+	Set objExcel = Nothing
+	Set objWorkbook = Nothing
+End Function
+
+Function ExcelGetByColumnName(FilePath, Sheet, Row, ColumnName)
+Col = ExcelFind(FilePath, Sheet, ColumnName, "A1:ZZ1", "Col")
+ExcelGetByColumnName = ExcelGet(FilePath, Sheet, Row, Col)
+End Function
+
+'**********************************************************************
+' Function Name:	  	ExcelGet
+' Author:					   Adam Thomas
+' Purpose:					Returns a cell value 
+' Prerequisites:		
+'**********************************************************************
+Function ExcelGet(FilePath, Sheet, Row, Col)
+	Set objExcel = CreateObject("Excel.Application")
+	objExcel.Visible = False
+	'Supress any warnings
+	objExcel.Application.DisplayAlerts = False
+	'Open source file
+	Set objWorkbook = objExcel.Workbooks.Open(FilePath)
+'	Find Cell containing search string
+	If Sheet <> "" Then
+		objWorkbook.sheets(Sheet).Activate
+	End If
+	Set objSheet = objWorkbook.ActiveSheet
+	ExcelGet = objSheet.Cells(Row, Col).Value
+	objWorkbook.Close
+	Set objExcel = Nothing
+	Set objWorkbook = Nothing
+	Set objSheet = Nothing
+ End Function
+ 
+ '**********************************************************************
+' Function Name:	  	ExcelPut
+' Author:				Adam Thomas
+' Purpose:				Sets a cell value 
+' Prerequisites:		
+'**********************************************************************
+ Function ExcelPut(FilePath, Sheet, ValueToAdd, Row, Col)
+   	Set objExcel = CreateObject("Excel.Application")
+	objExcel.Visible = False
+	'Supress any warnings
+	objExcel.Application.DisplayAlerts = False
+	'Open source file
+	Set objWorkbook = objExcel.Workbooks.Open(FilePath)
+	objWorkbook.sheets(Sheet).Activate
+	Set objSheet = objWorkbook.ActiveSheet
+	objSheet.Cells(Row, Col) = ValueToAdd
+	objWorkbook.Save
+   	objWorkbook.Close
+	Set objExcel = Nothing
+	Set objWorkbook = Nothing
+	Set objSheet = Nothing
+End Function
+
+'**********************************************************************
+' Function Name:	  	ExcellFindFast
+' Author:						Adam Thomas
+' Purpose:					Returns a cell location, as an R,C e.g 5,3 or E,3 , for the given search. 
+' Prerequisites:		' Prerequisites:		Must use ExcelOn and ExcelOff functions 
+'**********************************************************************
+Public Function ExcelFindFast(SearchString, Range, RowOrCol)
+	Set r = objExcel.Range(Range).Find(SearchString)
+	On Error Resume Next
+		RC = r.Row & "," & r.Column
+	On Error GoTo 0
+	If RC <> "" Then
+        Select Case UCase(RowOrCol)
+		Case "ROW"
+			ExcelFindFast = r.Row
+		Case "COL"
+			ExcelFindFast = r.Column
+		Case Else
+			ExcelFindFast = RC
+		End Select
+	Else 
+    	ExcelFindFast = 0
+	End If
+End Function
+
+ '**********************************************************************
+' Function Name:	  	?????????
+' Author:				Adam Thomas
+' Purpose:					 
+' Prerequisites:		
+'***********************************************************************
+Public Function ExcelFindColumnFast(ColumnName)
+	Set r = objExcel.Range("A1:A1000").Find(ColumnName)
+	On Error Resume Next
+		RC = r.Row & "," & r.Column
+	On Error GoTo 0
+	If RC <> "" Then
+		ExcelFindColumnFast = r.Column
+	Else 
+    	ExcelFindColumnFast = 0
+	End If
+End Function
+
+ '**********************************************************************
+' Function Name:	  	?????????
+' Author:				Adam Thomas
+' Purpose:					 
+' Prerequisites:		
+'***********************************************************************
+Public Function ExcelFindFirstEmptyRowFast(ColumnLetter)
+	Set r = objExcel.Range(ColumnLetter&"1:"&ColumnLetter&"65000").Find("")
+	On Error Resume Next
+		ExcelFindFirstEmptyRowFast = r.Row 
+	On Error GoTo 0
+End Function
+
+ '**********************************************************************
+' Function Name:	  	?????????
+' Author:				Adam Thomas
+' Purpose:					 
+' Prerequisites:		
+'***********************************************************************
+Public Function ExcelWriteNextLineFast(ColumnName, Row, ValueToAdd)
+	Col = ExcelFindFast(ColumnName, "A1:BZ1","Col")
+	ExcelPutFast ValueToAdd,Row,Col
+End Function
+
+ '**********************************************************************
+' Function Name:	  	?????????
+' Author:				Adam Thomas
+' Purpose:					 
+' Prerequisites:		
+'***********************************************************************
+Public Function ExcelPutFast(ValueToAdd, Row, Col)
+	objSheet.Cells(Row, Col) = ValueToAdd
+	objWorkbook.Save
+End Function
+
+ '**********************************************************************
+' Function Name:	  	?????????
+' Author:				Adam Thomas
+' Purpose:					 
+' Prerequisites:		
+'***********************************************************************
+Public Function ExcelSaveFast()
+   objWorkbook.Save
+End Function
+
+'**********************************************************************
+' Function Name:	  	ExcelGetFast
+' Author:					   Adam Thomas
+' Purpose:					Returns a cell value 
+' Prerequisites:		Must use ExcelOn and ExcelOff functions 
+'**********************************************************************
+Function ExcelGetFast(Row, Col)
+   If CStr(Col) <> "0" and CStr(Row) <> "0" Then
+		ExcelGetFast = objSheet.Cells(Row, Col).Value
+	Else
+		ExcelGetFast = "CELL DOES NOT EXIST"
+   End If
+End Function
+
+ '**********************************************************************
+' Function Name:	  	?????????
+' Author:				Adam Thomas
+' Purpose:					 
+' Prerequisites:		
+'***********************************************************************
+Function ExcelGetCurrentSheetFast()
+	ExcelGetCurrentSheetFast = objSheet.Name
+End Function
+
+ '**********************************************************************
+' Function Name:	  	?????????
+' Author:				Adam Thomas
+' Purpose:					 
+' Prerequisites:		
+'***********************************************************************
+Function ExcelSwitchSheetFast(Sheet)
+	Set objSheet = Nothing
+	objWorkbook.sheets(Sheet).Activate
+	Set objSheet = objWorkbook.ActiveSheet
+End Function
+
+ '**********************************************************************
+' Function Name:	  	?????????
+' Author:				Adam Thomas
+' Purpose:					 
+' Prerequisites:		
+'***********************************************************************
+Function ExcelOn(FilePath, Sheet)
+   	Set objExcel = CreateObject("Excel.Application")
+	objExcel.Visible = False
+	'Supress any warnings
+	objExcel.Application.DisplayAlerts = False
+	'Open source file
+	Set objWorkbook = objExcel.Workbooks.Open(FilePath)
+'	Find Cell containing search string
+	If Sheet <> "" Then
+		objWorkbook.sheets(Sheet).Activate
+	End If
+	Set objSheet = objWorkbook.ActiveSheet
+End Function
+
+ '**********************************************************************
+' Function Name:	  	?????????
+' Author:				Adam Thomas
+' Purpose:					 
+' Prerequisites:		
+'***********************************************************************
+Function ExcelOnVisible(FilePath, Sheet)
+   	Set objExcel = CreateObject("Excel.Application")
+	objExcel.Visible = True
+	'Supress any warnings
+	objExcel.Application.DisplayAlerts = False
+	'Open source file
+	Set objWorkbook = objExcel.Workbooks.Open(FilePath)
+'	Find Cell containing search string
+	objWorkbook.sheets(Sheet).Activate
+	Set objSheet = objWorkbook.ActiveSheet
+End Function
+
+ '**********************************************************************
+' Function Name:	  	ExcelOff
+' Author:				Adam Thomas
+' Purpose:					 
+' Prerequisites:		
+'***********************************************************************
+Function ExcelOff
+   	objWorkbook.Close
+	Set objExcel = Nothing
+	Set objWorkbook = Nothing
+	Set objSheet = Nothing
+End Function
+
+ '**********************************************************************
+' Function Name:	  	GetSheetNames
+' Author:				Adam Thomas
+' Purpose:				Returns an array of all worksheet names within a givein workbook	 
+' Prerequisites:		
+'***********************************************************************
+Function GetSheetNames(FilePath)
+
+	Set objXL = CreateObject("Excel.Application")
+	Set objWB = objXL.WorkBooks.Open(FilePath)
+	Set objWS = objXL.ActiveWorkBook.WorkSheets("Driver")
+	
+	Dim NoOfSheets 
+	Dim SheetNames() 
+	Dim counter 
+	
+	NoOfSheets = objWB.Sheets.Count
+	ReDim SheetNames(NoOfSheets - 1)
+	
+	For counter = 0 To NoOfSheets - 1
+		SheetNames(counter) = objWB.Sheets(Counter + 1).Name
+	Next
+	GetSheetNames = SheetNames
+	objWB.Close
+	Set objWB = Nothing
+	Set objXL = Nothing
+	Set objWS = Nothing
+
+End Function
+
+ 
+ '**********************************************************************
+' Function Name:	  	ColLtr
+' Author:				Adam Thomas
+' Purpose:				Converts a column number to a column letter 
+' Prerequisites:		
+'**********************************************************************
+Function ConvertToLetter(mycolumn)
+	If mycolumn > 26 Then
+	Mcl = Chr(Int((mycolumn - 1) / 26) + 64) & Chr(Int((mycolumn - 1) Mod 26) + 65)
+	Else
+	Mcl = Chr(mycolumn + 64)
+	End If
+	ConvertToLetter = Mcl
+End Function
+
+Function ConvertToNumber(InputLetter)
+	InputLetter = Trim(InputLetter)
+	Leng = Len(InputLetter)
+	OutputNumber = 0
+	For i = 1 To Leng
+	   OutputNumber = (Asc(UCase(Mid(InputLetter, i, 1))) - 64) + OutputNumber * 26
+	Next 
+	ConvertToNumber = OutputNumber   'Output the corresponding number
+End Function
