@@ -1786,25 +1786,28 @@ End Function
 'Call Function Using: objWebTable.GetColumnWithCellText(strSearchText, intSearchRow, blnExact)
 '											
 '			
-'Inputs:		
-'					None		
+'Inputs:
+'  	None		
 '
 'Parameters:
-'							objTable   				Webtable object
-'							strSearchText 		The text  that is to be searched for
-'							intSearchRow		The row to search for strSearchText
-'							blnExact					If True, then the strSearchText has to match precisely, otherwise the strSearchText only has to exist within the cell
+'	objTable - Webtable object
+'	strSearchText - The text  that is to be searched for
+'	intSearchRow - The row to search for strSearchText
+'	blnExact - If True, then the strSearchText has to match precisely, otherwise the strSearchText only has to exist within the cell
 'Prerequisite:			
-'							Send an active webtable
+'	Send an active webtable
 'Description:
-'							This method will search the columns of a WebTable and return the column number of queried text
+'	This method will search the columns of a WebTable and return the column number of queried text
 'Return Value: 
-'								Returns a 1 if the function failed
-'Date:					11/27/2012
+'	Returns a 1 if the function failed
+'Date:	
+'	11/27/2012
 '
-'Review Status: 			Needs to be reviewed
+'Review Status:
+'	Needs to be reviewed
 '
-'Change history:					11/27/12 -Justin Phlegar - Original	
+'Change history:					
+'	11/27/12 -Justin Phlegar - Original	
 '													
 
 'Register the GetColumnWithCellText method
@@ -1823,17 +1826,17 @@ Public Function GetColumnWithCellText(objTable, strSearchText, intSearchRow, bln
 	
 	'Loop through each row and search for queried text. If the text if found, then break the loop
 	For intCurrentColumn = 1 To intNumColumns
-			If blnExact Then
-				If(strSearchText = objTable.GetCellData(intSearchRow, intCurrentColumn))Then
-					blnFound = True
-					Exit For
-				End If
-			Else 
-				If(InStr(1,objTable.GetCellData(intSearchRow, intCurrentColumn),strSearchText))Then
-					blnFound = True
-					Exit For
-				End If
+		If blnExact Then
+			If(strSearchText = objTable.GetCellData(intSearchRow, intCurrentColumn))Then
+				blnFound = True
+				Exit For
 			End If
+		Else 
+			If(InStr(1,objTable.GetCellData(intSearchRow, intCurrentColumn),strSearchText))Then
+				blnFound = True
+				Exit For
+			End If
+		End If
 	Next
 
 	Reporter.Filter = rfEnableAll
