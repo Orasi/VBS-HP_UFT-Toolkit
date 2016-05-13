@@ -992,14 +992,21 @@ End Function
 'Purpose: 
 'Modfied By:
 Function DefaultTimeout()
-	Setting("DefaultTimeOut")= "30000"
+	If Environment.Value("TO") <>"" Then
+		Setting("DefaultTimeOut")= Environment.Value("TO")
+	Else
+		Setting("DefaultTimeOut")= "30000"
+	End If
 End Function
 
 'Author: Adam Thomas
 'Purpose: 
 'Modfied By:
 Function ShortTimeout()
+	Default = Setting("DefaultTimeOut")
 	Setting("DefaultTimeOut")= "500"
+	Environment.Value("TO") = Default
+	ShortTimeout = Default
 End Function
 
 'Author: Adam Thomas
