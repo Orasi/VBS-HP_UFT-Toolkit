@@ -1003,10 +1003,10 @@ End Function
 'Purpose: 
 'Modfied By:
 Function ShortTimeout()
-	Default = Setting("DefaultTimeOut")
+	Def = Setting("DefaultTimeOut")
 	Setting("DefaultTimeOut")= "500"
-	Environment.Value("TO") = Default
-	ShortTimeout = Default
+	Environment.Value("TO") = Def
+	ShortTimeout = Def
 End Function
 
 'Author: Adam Thomas
