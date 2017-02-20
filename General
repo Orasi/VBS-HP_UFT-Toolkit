@@ -445,6 +445,7 @@ Function SetFireFoxCertificates(CertOverrideALMResourceID)
 	CertDLPath = QCGetResource(CertOverrideALMResourceID)
 	'Copy text to Firefox app data directory
 	FileSys.CopyFile CertDLPath, FFPath,True
+	Set FileSys=nothing
 End Function
 
 '**********************************************************************
@@ -650,6 +651,8 @@ Function GetUserEV(EnvironmentalVariableName)
 	Set objWSH =  CreateObject("WScript.Shell")
 	Set objUserVariables = objWSH.Environment("USER")
 	GetUserEV = objUserVariables(EnvironmentalVariableName)
+	Set objUserVariables = nothing
+	Set objWSH =  nothing
 End Function
 
 
@@ -663,6 +666,8 @@ Function SetUserEV(EnvironmentalVariableName, Value)
 	Set objWSH =  CreateObject("WScript.Shell")
 	Set objUserVariables = objWSH.Environment("USER")
 	objUserVariables(EnvironmentalVariableName) = Value
+	Set objUserVariables = nothing
+	Set objWSH =  nothing
 End Function
 
  '**********************************************************************
