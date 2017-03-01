@@ -375,3 +375,144 @@ Public Function GetTestNameFromID(ALMTestID)
 	Set TestList = TDConnection.TestFactory.NewList("SELECT * FROM TEST WHERE TS_TEST_ID = " & ALMTestID )
 	GetTestNameFromID = TestList(1).Name
 End Function
+
+
+'Author: Adam Thomas
+'Purpose: Returns an array list of sub folder IDs belonging to all parent folder ids given
+Function FindAllSubFolders(RootFolderIDs, Depth)
+	
+	Set FoldersToScanCurrently = CreateObject( "System.Collections.ArrayList")
+	Set FoldersToScanNext = CreateObject( "System.Collections.ArrayList")
+	Set FoldersFound = CreateObject( "System.Collections.ArrayList")
+	
+	
+	'Set root folders up
+	aRootFolderIDs = Split(RootFolderIDs, ",")
+	For each RootFolderID in aRootFolderIDs
+		FoldersToScanCurrently.add Trim(RootFolderID)
+	Next
+	
+	Set oTDC = QCUtil.QCConnection
+	Set oResourceFolder = oTDC.QCResourceFolderFactory
+	
+	
+	For d = 1 To Depth
+		family = 0
+		
+		For Each folder in FoldersToScanCurrently
+			FoldersFound.add folder
+			Set Temp = GetChildren(Folder) 
+			
+			For each item in Temp
+				FoldersToScanNext.Add item
+			Next
+			
+			family = family + Temp.Count
+			Temp.Clear()
+		Next
+		
+		FoldersToScanCurrently.Clear()
+		
+		For Each item in FoldersToScanNext
+			FoldersToScanCurrently.Add item
+		Next
+	
+		FoldersToScanNext.Clear()
+		
+		If Family = 0 Then
+			Exit For
+		End If
+	
+	Next 
+
+	Set FindAllSubFolders = FoldersFound
+End Function
+
+'Author: Adam Thomas
+'Purpose: Returns an array list of sub folder IDs belonging to a single folder. For use with the 'FindAllSubFolders' function
+Function GetChildren(RootID)
+
+		Set Children = CreateObject( "System.Collections.ArrayList")
+		
+		Set oTDC = QCUtil.QCConnection
+		Set oResourceFolder = oTDC.QCResourceFolderFactory
+	
+		Set Root = oResourceFolder.item(RootID)
+		Set ChildrenFolders = Root.QCResourceFolderFactory.NewList("")
+		
+		ChildrenCount = ChildrenFolders.Count
+		
+		For f = 1 To ChildrenCount Step 1
+			Children.add ChildrenFolders.Item(f).ID
+		Next
+		
+		Set GetChildren = Children
+		
+End Function
+
+'Author: Adam Thomas
+'Purpose: Returns an array list of data sheet IDs belonging to all folder ids given
+Function GetXLSFilesFromFolder(aRootFolderIDs)
+	
+	Dim aName
+	Dim FoundBool
+	Dim oTDC
+	Dim oResourceFactory
+	Dim RootResources
+	Dim oSub
+	Dim iTotalItems
+	Dim ItemCtr
+	Dim CurItem
+	Dim FileName
+	Set SheetIDs = CreateObject( "System.Collections.ArrayList" )
+	
+	If NOT(QCUtil.isConnected) Then
+		Reporter.ReportEvent micFail, "Not Connected to QC", "QTP isn't connected to QC and can't download the file"
+		QCImport = False
+			'Exit Function
+	End If
+
+	
+	Set oTDC = QCUtil.QCConnection
+	Set oResourceFolder = oTDC.QCResourceFolderFactory
+	
+	For each RootFolderID in aRootFolderIDs
+			
+		RootFolderID = Trim(RootFolderID)
+	
+		'Checks QC connectivity
+
+		'Set oResourceFactory = oTDC.QCResourceFactory
+		
+		
+		Set Root = oResourceFolder.item(RootFolderID)
+		Set oResourceFactory = Root.QCResourceFactory
+		Set RootResources = oResourceFactory.NewList("")
+		
+		Set oSub = Nothing
+		FoundBool = False
+	
+		'Find resource
+		iTotalItems = RootResources.Count
+		For ItemCtr = 1 To iTotalItems
+				
+			If cstr(RootResources.Item(ItemCtr).ParentId) = cstr(RootFolderID) Then
+			
+				If InStr(RootResources.Item(ItemCtr).FileName, ".xls") > 0 Then
+					SheetIDs.add RootResources.Item(ItemCtr).ID
+				End If
+				
+			End If
+			
+		Next
+	
+		'Clean
+		Set RootResources = Nothing
+		Set oResourceFactory = Nothing
+		Set oTDC = Nothing
+		
+	Next
+
+	Set GetXLSFilesFromFolder = SheetIDs
+
+End Function
