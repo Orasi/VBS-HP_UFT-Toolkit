@@ -1,9 +1,5 @@
-
-
-'**********************************************************************
-' Function Name: RunIteration
-' Purpose: returns a true or false based on whether an iteration number falls withing an adanvced range
-'Author: Adam Thomas
+﻿'Author: Adam Thomas
+'Purpose: returns a true or false based on whether an iteration number falls withing an adanvced range
 '	Samples of an (advanced)iteration range are as follows:
 '	IterationRange = "1,2,3,4-10"
 '	IterationRange2 = "4-10"
@@ -14,13 +10,7 @@
 '	IterationRange7 = "<LAST>"
 '	IterationRange8 = "2,7,8"
 '	IterationRange9 = "1"
-' Inputs:
-'	CurrentIteration
-'	IterationRange
-'	LastRow
-' Returns: True/False
-' Prerequisites: Unknown
-'**********************************************************************
+'Modfied By:
 Function RunIteration(CurrentIteration, IterationRange, LastRow)
 	CI = CStr(CurrentIteration)
 	IR = Trim(UCase(IterationRange))
@@ -66,16 +56,9 @@ Function RunIteration(CurrentIteration, IterationRange, LastRow)
 	RunIteration = Result
 End Function
 
-'**********************************************************************
-' Function Name: GetTestParameter
-' Purpose: Retrieves parameter data from the data sheet attached to the current test case
-' Author: Adam Thomas
-' Input:
-'	TestParameter
-'	Iteration'
-' Return: String
-' Prerequisites: Unknown
-'**********************************************************************
+'Author: Adam Thomas
+'Purpose: Retrieves parameter data from the data sheet attached to the current test case
+'Modfied By:
 Function GetTestParameter(TestParameter, Iteration)
 	CurrentTestID = GetCurrentTestID()
 	TempFolder = GetSystemTempFolder()
@@ -86,16 +69,9 @@ Function GetTestParameter(TestParameter, Iteration)
 	DS.Destruct
 End Function
 
-'**********************************************************************
-' Function Name: GetScenarioDataRowCount
-' Purpose: Retrieves the amount of rows that contain data from the TestData.xlsx
-'	 that is attached the the scenario/driver(test)
-' Author: Adam Thomas
-' Input:
-'	ScenarioTestID
-' Return: integer
-' Prerequisites:
-'**********************************************************************
+'Author: Adam Thomas
+'Purpose: Retrieves the amount of rows that contain data from the TestData.xlsx that is attached the the scenario/driver(test)
+'Modfied By:
 Function GetScenarioDataRowCount(ScenarioTestID)
 	TempFolder = CreateTempFolder("C:\Temp\UFT\")
 	AttachPath = DownloadAttachmentFromTest(ScenarioTestID, "TestData.xlsx", TempFolder)
@@ -105,19 +81,12 @@ Function GetScenarioDataRowCount(ScenarioTestID)
 	DeleteFileByPath AttachPath
 End Function
 
-'**********************************************************************
-' Function Name: GetData
-' Purpose: Gets data from the data table and converts any key words to the
-'	appropriate string
-' Author: Adam Thomas
-' Input:
-'	Parameter
-'	DatableObject
-' Return: string
-' Prerequisites:
-'**********************************************************************
+'Author: Adam Thomas
+'Purpose: Gets data from the data table and converts any key words to the appropriate string
+'Modfied By:
 Function GetData(DatableObject, Parameter)
-	TempData = DatableObject.GetParameter(Parameter)
+	Set DT = DatableObject
+	TempData = DT.GetParameter(Parameter)
 
 	Select Case UCase(TempData)
 		Case "<TODAY>", "<NOW>", "<CURRENTDATE>"
@@ -127,48 +96,36 @@ Function GetData(DatableObject, Parameter)
 	End Select
 
 	GetData = Trim(DataOut)
+
 End Function
 
-'**********************************************************************
-' Function Name: SetSelectOptional
-' Purpose: Selects an item from a dropdown ONLY if there is data provided in
-'	the parameter
+
+'Author: Adam Thomas
+'Purpose: Selects an item from a dropdown ONLY if there is data provided in the parameter
+'Modfied By:
 ' Sample implementation:
 ' RegisterUserFunc "SwfComboBox", "SelectOptional", "SetSelectOptional"
-' Author: Adam Thomas
-' Input:
-'	SelectObject
-'	DatatableObject
-'	Parameter
-' Return: string?
-' Prerequisites:
-'**********************************************************************
 Function SetSelectOptional(SelectObject, DatatableObject, Parameter)
 	SelectData = GetData(DatatableObject, Parameter)
+	Set SO = SelectObject
 	If SelectData <> "" Then
-		SelectObject.Select SelectData
+		SO.Select SelectData
 	End If
 End Function
 
-'**********************************************************************
-' Function Name: SelectNullAllItemsCombo
-' Purpose:
+
+
+
 ' Sample implementation:
-' RegisterUserFunc "SwfComboBox", "SelectEnhanced", "SelectNullAllItemsCombo"
-' Author: Adam Thomas
-' Input:
-'	ComboBoxObject
-'	ItemText
-' Return:
-' Prerequisites:
-'**********************************************************************
+'RegisterUserFunc "SwfComboBox", "SelectEnhanced", "SelectNullAllItemsCombo"
 Function SelectNullAllItemsCombo(ComboBoxObject, ItemText)
 	SuccessFlag = False
-	Count = ComboBoxObject.GetItemsCount()
-	ComboBoxObject.Click
+	Set CO = ComboBoxObject
+	Count = CO.GetItemsCount()
+	CO.Click
 
 	For i = 0 To Count Step 1
-		If ComboBoxObject.GetROProperty("text") = ItemText Then
+		If CO.GetROProperty("text") = ItemText Then
 			SuccessFlag = True
 			Exit For
 		End If
@@ -178,7 +135,7 @@ Function SelectNullAllItemsCombo(ComboBoxObject, ItemText)
 
 	If Not SuccessFlag Then
 		For i = 0 To Count Step 1
-			If ComboBoxObject.GetROProperty("text") = ItemText Then
+			If CO.GetROProperty("text") = ItemText Then
 				SuccessFlag = True
 				Exit For
 			End If
@@ -187,9 +144,9 @@ Function SelectNullAllItemsCombo(ComboBoxObject, ItemText)
 		Next
 	End If
 
-	Name = ComboBoxObject.GetRoProperty("swfname")
-	CurValue = ComboBoxObject.GetROProperty("text")
-	ComboBoxObject.Click ' force dropdown to close, to not cover up the "Add" button
+	Name = CO.GetRoProperty("swfname")
+	CurValue = CO.GetROProperty("text")
+	CO.Click ' force dropdown to close, to not cover up the "Add" button
 	If Not Successflag Then
 		Reporter.ReportEvent micFail, "Select from Combobox", "Combo object name: " & Name _
 		& ML(2) & "Item requested: " & ItemText & ML(2) & "Value Selected: " & CurValue
@@ -197,17 +154,12 @@ Function SelectNullAllItemsCombo(ComboBoxObject, ItemText)
 
 End Function
 
-'**********************************************************************
-' Function Name:SetUpComponentData
-' Purpose: Pulls data from the TestData.xls attached to a test id and loads it
-'	into the datable and sets the current rom being read from
-' Author: Adam Thomas
-' Input:
-'	ScenarioTestID
-'	IterationID
-' Return: DataTable
-' Prerequisites:
-'**********************************************************************
+
+
+
+'Author: Adam Thomas
+'Purpose: Pulls data from the TestData.xls attached to a test id and loads it into the datable and sets the current rom being read from
+'Modfied By:
 Function SetUpComponentData(ScenarioTestID, IterationID)
 	SuccessFlag = False
 	DataPath = GetTestData(ScenarioTestID)
@@ -239,17 +191,13 @@ Function SetUpComponentData(ScenarioTestID, IterationID)
 	End If
 
 	Set SetUpComponentData = DT
+
 End Function
 
-'**********************************************************************
-' Function Name: UploadComponentData
-' Purpose: Pushes the datatable to the scenario(test) Id as an attachment
-' Author: Adam Thomas
-' Input:
-'	ScenarioTestID'
-' Return: None
-' Prerequisites:
-'**********************************************************************
+
+'Author: Adam Thomas
+'Purpose: Pushes the datatable to the scenario(test) Id as an attachment
+'Modfied By:
 Function UploadComponentData(ScenarioTestID)
 	TempFolder = CreateTempFolder("C:\Temp\UFT\")
 	DataTable.ExportSheet TempFolder & "TestData.xlsx", DTLocalSheet, "Sheet1"
@@ -261,32 +209,17 @@ Function UploadComponentData(ScenarioTestID)
 	RemoveAttachmentFromTest ScenarioTestID, "TestData - BACKUP.xlsx"
 End Function
 
-'**********************************************************************
-' Function Name:
-' Purpose: Retrieves the data sheet attached to the current test case
-' Author: Adam Thomas
-' Input:
-'	ScenarioTestID'
-' Return:
-' Prerequisites:
-'**********************************************************************
+'Author: Adam Thomas
+'Purpose: Retrieves the data sheet attached to the current test case
+'Modfied By:
 Function GetTestData(ScenarioTestID)
 	TempFolder = CreateTempFolder("C:\Temp\UFT\")
 	GetTestData = DownloadAttachmentFromTest(ScenarioTestID, "TestData.xlsx", TempFolder)
 End Function
 
-'**********************************************************************
-' Function Name: IESave
-' Purpose: Uses the IE download prompt to same and locate a file being saved
-'	from IE
-' Author: Adam Thomas
-' Input:
-'	Timeout
-' Return:
-' Prerequisites:
-'	methods:
-' 		GetLatestDownload()
-'**********************************************************************
+'Author: Adam Thomas
+'Purpose: Uses the IE download prompt to same and locate a file being saved from IE
+'Modfied By:
 Function IESave(Timeout)
 	ReportingOff
 	PossibleOldDL = GetLatestDownload()
@@ -348,14 +281,9 @@ Function IESave(Timeout)
 	Setting("DefaultTimeOut")= "30000"
 End Function
 
-'**********************************************************************
-' Function Name:CleanUp
-' Purpose: Prepares a machine for test excecution
-' Author: Adam Thomas
-' Input: None
-' Return:
-' Prerequisites:
-'**********************************************************************
+'Author: Adam Thomas
+'Purpose: Prepares a machine for test excecution
+'Modfied By:
 Public Function CleanUp()
 	ReportingOff
 	StartTime = Timer
@@ -433,36 +361,21 @@ Public Function CleanUp()
 	End If
 End Function
 
-'**********************************************************************
-' Function Name: SendKeys
-' Purpose: Sends key strokes to any active window or object
-' Useful Keys: {BACKSPACE}, {BS}, or {BKSP} {BREAK} {CAPSLOCK} {DELETE} or {DEL}
-'	 {DOWN} {END} {ENTER} or ~{ESC} {HELP} {HOME} {INSERT} or {INS} {LEFT}
-'	{NUMLOCK} {PGDN} {PGUP} {PRTSC} {RIGHT} {SCROLLLOCK} {TAB} {UP} {F1} {F2}
-'	{F3} {F4} {F5} {F6} {F7} {F8} {F9} {F10} {F11} {F12} {F13} {F14} {F15} {F16}
+
 ' Author: Adam Thomas
-' Input:
-'	KeysToSend
-' Return: None
-' Prerequisites: object keystrokes are intended for MUST be activated and at the
-'	top layer of the screen
-'**********************************************************************
+' Purpose: Sends key strokes to any active window or object
+' Prerequisites: object keystrokes are intended for MUST be activated and at the top layer of the screen
+'Useful Keys: {BACKSPACE}, {BS}, or {BKSP} {BREAK} {CAPSLOCK} {DELETE} or {DEL} {DOWN} {END} {ENTER} or ~{ESC} {HELP} {HOME} {INSERT} or {INS} {LEFT} {NUMLOCK} {PGDN} {PGUP} {PRTSC} {RIGHT} {SCROLLLOCK} {TAB} {UP} {F1} {F2} {F3} {F4} {F5} {F6} {F7} {F8} {F9} {F10} {F11} {F12} {F13} {F14} {F15} {F16}
 Function SendKeys(KeysToSend)
 	Set WshShell = CreateObject("WScript.Shell")
 	WshShell.SendKeys KeysToSend
 	Set WshShell = Nothing
 End Function
 
-'**********************************************************************
-' Function Name: SendKeysSlowley
-' Purpose: standard send keys with a configurable delay between key strokes. Useful for AJAX controls
-' Author: Adam Thomas
-' Input:
-'	StringToType
-'	TimeBetweenKeystrokesInMiliseconds
-' Return: None
-' Prerequisites:
-'**********************************************************************
+
+'Author: Adam Thomas
+'Purpose: standard send keys with a configurable delay between key strokes. Useful for AJAX controls
+'Modfied By:
 Function SendKeysSlowley(StringToType, TimeBetweenKeystrokesInMiliseconds)
 	Set WshShell = CreateObject("WScript.Shell")
 	LenOfStr = Len(StringToType)
@@ -471,18 +384,15 @@ Function SendKeysSlowley(StringToType, TimeBetweenKeystrokesInMiliseconds)
 		Letters = Right(Letters, 1)
 		WshShell.SendKeys Letters
 		Wait 0,TimeBetweenKeystrokesInMiliseconds
-	Next
+    Next
 	Set WshShell = Nothing
 End Function
 
 
 '**********************************************************************
-' Function Name: oDateDiff
+' Function Name:	 oDateDiff
+' Author:			 Adam Thomas
 ' Purpose:
-' Author: Adam Thomas
-' Input:
-'	DateString
-' Return:
 ' Prerequisites:
 '**********************************************************************
 Function oDateDiff(DateString)
@@ -494,16 +404,13 @@ Function oDateDiff(DateString)
 		oDateDiff = DateDiff( "d",dtm1 ,dtm2)
 	Else
 		oDateDiff = -1
-	End If
+   End If
 End Function
 
 '**********************************************************************
-' Function Name: UniqueNumber
+' Function Name:	 UniqueNumber
+' Author:			 Adam Thomas
 ' Purpose:
-' Author: Adam Thomas
-' Input:
-'	LengthOfNumber
-' Return: string
 ' Prerequisites:
 '**********************************************************************
 Function UniqueNumber(LengthOfNumber)
@@ -520,16 +427,13 @@ Function UniqueNumber(LengthOfNumber)
 End Function
 
 '**********************************************************************
-' Function Name: SetFireFoxCertificates
+' Function Name:	  	SetFireFoxCertificates
+' Author:				Adam Thomas
 ' Purpose:
-' Author: Adam Thomas
-' Input:
-'	CertOverrideALMResourceID'
-' Return:
-' Prerequisites: Yes
+' Prerequisites:
 '**********************************************************************
 Function SetFireFoxCertificates(CertOverrideALMResourceID)
-	Set FileSys=CreateObject("Scripting.FileSystemObject")
+   	Set FileSys=CreateObject("Scripting.FileSystemObject")
 	FFPath = GetUserProfilePath() & "\Application Data\Mozilla\Firefox\Profiles"
 	FFExtendedPath = GetChildFolders(FFPath)
 	If Ubound(FFExtendedPath) = 1 Then
@@ -545,14 +449,9 @@ Function SetFireFoxCertificates(CertOverrideALMResourceID)
 End Function
 
 '**********************************************************************
-' Function Name: OverFlowEdit
+' Function Name:	  	OverFlowEdit
+' Author:				Adam Thomas
 ' Purpose:
-' Author: Adam Thomas
-' Input:
-'	EditObject
-'	CharacterQty
-'	Message
-' Return:
 ' Prerequisites:
 '**********************************************************************
 Function OverFlowEdit(EditObject,CharacterQty, Message)
@@ -579,15 +478,9 @@ Function OverFlowEdit(EditObject,CharacterQty, Message)
 End Function
 
 '**********************************************************************
-' Function Name: OverFlowEditReq
+' Function Name:	  	OverFlowEditReq
+' Author:				Adam Thomas
 ' Purpose:
-' Author: Adam Thomas
-' Input:
-'	EditObject
-'	CharacterQty
-'	ReqID
-'	Message
-' Return: no
 ' Prerequisites:
 '**********************************************************************
 Function OverFlowEditReq(EditObject,CharacterQty, ReqID, Message)
@@ -613,41 +506,35 @@ Function OverFlowEditReq(EditObject,CharacterQty, ReqID, Message)
 	OverFlow = Result
 End Function
 
+
+
 '**********************************************************************
-' Function Name: L
-' Purpose: Adds a new line. To be used with the reporter.
-' Author: Adam Thomas
-' Input:None
-' Return: String
-' Prerequisites: None
+' Function Name:	  	L
+' Author:				Adam Thomas
+' Purpose:				Adds a new line. To be used with the reporter.
+' Prerequisites:
 '**********************************************************************
 Function L()
 	 L = chr(13) & chr(10)
 End Function
 
 '**********************************************************************
-' Function Name: ML
-' Purpose: Adds multiple new lines. To be used with the reporter.
-' Author: Adam Thomas
-' Input:
-'	NumberOfLines
-' Return:
+' Function Name:	  	ML
+' Author:				Adam Thomas
+' Purpose:				Adds multiple new lines. To be used with the reporter.
 ' Prerequisites:
 '**********************************************************************
 Function ML(NumberOfLines)
-	For n = 1 to NumberOfLines
+   For n = 1 to NumberOfLines
 		 nl = nl & chr(13) & chr(10)
-	Next
-	ML = nl
+   Next
+   ML = nl
 End Function
 
 '**********************************************************************
-' Function Name: RegExCleaner
-' Purpose: Clears a string of any regular expression characters
-' Author: Adam Thomas
-' Input:
-'	StringToClean
-' Return: string
+' Function Name:	  	RegExCleaner
+' Author:				Adam Thomas
+' Purpose:				Clears a string of any regular expression characters
 ' Prerequisites:
 '**********************************************************************
 Function RegExCleaner(StringToClean)
@@ -659,12 +546,9 @@ Function RegExCleaner(StringToClean)
 End Function
 
 '**********************************************************************
-' Function Name: UpdateTestPlanField
-' Purpose: Unknown
-' Author: Adam Thomas
-' Input:
-'	StrStatus
-' Return:
+' Function Name:	 UpdateTestPlanField
+' Author:			 Vicky Chen
+' Purpose:
 ' Prerequisites:
 '**********************************************************************
 Sub UpdateStatus(StrStatus)
@@ -672,18 +556,13 @@ Sub UpdateStatus(StrStatus)
 		QCUtil.CurrentTest.Field("TS_USER_TEMPLATE_02") = StrStatus
 		QCUtil.CurrentTest.Post
 		Reporter.ReportEvent  micDone, "TP Table Environment Field update succeed","TP Table Environment Field update successful with status " & StrStatus
-	On Error GoTo 0
+   	On Error GoTo 0
 End Sub
 
 '**********************************************************************
-' Function Name: FindUIColumn
-' Purpose: Finds column number with a given column name
-' Author: Adam Thomas
-' Input:
-'	HeaderRow
-'	TableObject
-'	ColumnName
-' Return: integer OF THE COLUMN
+' Function Name:	  	FindUIColumn
+' Author:				Adam Thomas
+' Purpose:				Finds column number with a given column name
 ' Prerequisites:
 '**********************************************************************
 Function FindUIColumn(TableObject, ColumnName, HeaderRow)
@@ -707,13 +586,9 @@ Function FindUIColumn(TableObject, ColumnName, HeaderRow)
 End Function
 
 '**********************************************************************
-' Function Name: TableSignature
-' Purpose: Returns a string representing the state of a table.
-' Author: Adam Thomas
-' Input:
-'	TableObject
-'	ColumnRow 	string
-' Return: 	string
+' Function Name:	  	TableSignature
+' Author:				Adam Thomas
+' Purpose:				Returns a string representing the state of a table.
 ' Prerequisites:
 '**********************************************************************
 Function TableSignature(TableObject, ColumnRow)
@@ -725,16 +600,15 @@ Function TableSignature(TableObject, ColumnRow)
 				TableSig = TableSig & "~" & TableObject.GetCellData(r,c)
 			Next
 		Next
-	On Error GoTo 0
+   	On Error GoTo 0
 	TableSignature = TableSig
 End Function
 
+
 '**********************************************************************
-' Function Name: TimeStamp
-' Purpose: Converts date time string to an acceptable format for file systems
-' Author: Adam Thomas
-' Input: None
-' Return: string
+' Function Name:	  	TimeStamp
+' Author:				Adam Thomas
+' Purpose:				Converts date time string to an acceptable format for file systems
 ' Prerequisites:
 '**********************************************************************
 Function TimeStamp()
@@ -745,16 +619,10 @@ Function TimeStamp()
 End Function
 
 '**********************************************************************
-' Function Name: CreateReportWithScreenShot
-' Purpose: 	creates QTP/UFT reporter message with screenshot of system
-' Author: Adam Thomas
-' Input:
-'	PassFailDoneOrWarning
-'	StepName
-'	Details
-' Return: none
-' Prerequisites:
-'	DeleteFileByPath
+' Function Name:	  	CreateReportWithScreenShot
+' Author:						Adam Thomas
+' Purpose:					creates QTP/UFT reporter message with screenshot of system
+' Prerequisites:		Function CreateTempFolder, FunctionDeleteFileByPath
 '**********************************************************************
 Function CreateReportWithScreenShot(PassFailDoneOrWarning,StepName,Details)
 	TF = CreateTempFolder("C:\Temp\UFT\")
@@ -773,13 +641,10 @@ Function CreateReportWithScreenShot(PassFailDoneOrWarning,StepName,Details)
 	DeleteFileByPath(TF)
 End Function
 
-'**********************************************************************
-' Function Name: GetUserEV
-' Purpose:Get and return Environment Variable
-' Author: Adam Thomas
-' Input:
-'	EnvironmentalVariableName'
-' Return: string
+ '**********************************************************************
+' Function Name:	  	GetUserEV
+' Author:				Adam Thomas
+' Purpose:
 ' Prerequisites:
 '**********************************************************************
 Function GetUserEV(EnvironmentalVariableName)
@@ -790,14 +655,11 @@ Function GetUserEV(EnvironmentalVariableName)
 	Set objWSH =  nothing
 End Function
 
-'**********************************************************************
-' Function Name: SetUserEV
-' Purpose: Changes Environment Variable
-' Author: Adam Thomas Changes Environment Variable
-' Input:
-'	EnvironmentalVariableName
-'	Value
-' Return: None
+
+ '**********************************************************************
+' Function Name:	  	SetUserEV
+' Author:				Adam Thomas
+' Purpose:
 ' Prerequisites:
 '**********************************************************************
 Function SetUserEV(EnvironmentalVariableName, Value)
@@ -808,13 +670,10 @@ Function SetUserEV(EnvironmentalVariableName, Value)
 	Set objWSH =  nothing
 End Function
 
-'**********************************************************************
-' Function Name: ReturnTextFileText
-' Purpose:  Reads and returnes text in file provided.
-' Author: Adam Thomas
-' Input:
-'	TxtFilePath'
-' Return: string
+ '**********************************************************************
+' Function Name:	  	ReturnTextFileText
+' Author:				Adam Thomas
+' Purpose:
 ' Prerequisites:
 '**********************************************************************
 Function ReturnTextFileText(TxtFilePath)
@@ -824,17 +683,11 @@ Function ReturnTextFileText(TxtFilePath)
 	Set objFileToRead = Nothing
 End Function
 
-'**********************************************************************
-' Function Name:
-' Purpose: Creates a random string at a given length. Uses random methods. For time based methods, use function RandomString
-' Author: Adam Thomas
-' Input:
-'	LengthOfStrimg
-' Return: string
-' Prerequisites: none
-'**********************************************************************
+'Author: Adam Thomas
+'Purpose: Creates a random string at a given length. Uses random methods. For time based methods, use function RandomString
+'Modfied By:
 Function RndString(LengthOfStrimg)
-	LongString = ""
+  	LongString = ""
 	For x = 1 to LengthOfStrimg
 		max = 90
 		min = 65
@@ -847,9 +700,9 @@ Function RndString(LengthOfStrimg)
 End Function
 
 
-'**********************************************************************
-' Function Name: encrypt
-' Purpose: encrypts a string
+'Author: Unknown
+'Purpose: encrypts a string
+'Modfied By:
 'Encryption Example
 '	temp = "MyPassword"
 ' 	key = "myrandomkey"
@@ -858,71 +711,50 @@ End Function
 '	MSGBOX Before
 ' 	After = Decrypt(Before,key)
 ' 	MSGBOX After
-' Author: Unknown
-' Input:
-'	key
-'	Str
-' Return: string
-' Prerequisites:
-'**********************************************************************
 Function encrypt(Str, key)
-	'Dim lenKey, KeyPos, LenStr, x, Newstr
-	origionalStringLength = Len(str)
-	BeforeSetLength = 15 - origionalStringLength
-	BeforeSet = RandomString(BeforeSetLength)
-	AfterSet = RandomString(15)
-	Str = BeforeSet & "~" & Str & "~" & AfterSet
-	Newstr = ""
-	lenKey = Len(key)
-	KeyPos = 1
-	LenStr = Len(Str)
-	str = StrReverse(str)
-	For x = 1 To LenStr
-		Newstr = Newstr & (chr(asc(Mid(str,x,1))+Asc(Mid(key,KeyPos,1))))
-		KeyPos = keypos+1
-		If KeyPos > lenKey Then KeyPos = 1
-	Next
-	encrypt = Newstr
-End Function
+  'Dim lenKey, KeyPos, LenStr, x, Newstr
+  origionalStringLength = Len(str)
+  BeforeSetLength = 15 - origionalStringLength
+  BeforeSet = RandomString(BeforeSetLength)
+  AfterSet = RandomString(15)
+  Str = BeforeSet & "~" & Str & "~" & AfterSet
+  Newstr = ""
+  lenKey = Len(key)
+  KeyPos = 1
+  LenStr = Len(Str)
+  str = StrReverse(str)
+  For x = 1 To LenStr
+       Newstr = Newstr & (chr(asc(Mid(str,x,1))+Asc(Mid(key,KeyPos,1))))
+       KeyPos = keypos+1
+       If KeyPos > lenKey Then KeyPos = 1
+  Next
+  encrypt = Newstr
+ End Function
 
-'**********************************************************************
-' Function Name: Decrypt
-' Purpose:
-' Author: Unknown
-' Input:
-'	str
-'	key String
-' Return: String
-' Prerequisites:
-'**********************************************************************
+'Author: Unknown
+'Purpose:
+'Modfied By:
 Function Decrypt(str,key)
-	Dim lenKey, KeyPos, LenStr, x, Newstr
+  Dim lenKey, KeyPos, LenStr, x, Newstr
 
-	Newstr = ""
-	lenKey = Len(key)
-	KeyPos = 1
-	LenStr = Len(Str)
+  Newstr = ""
+  lenKey = Len(key)
+  KeyPos = 1
+  LenStr = Len(Str)
 
-	str=StrReverse(str)
-	For x = LenStr To 1 Step -1
-		Newstr = Newstr & (chr(asc(Mid(str,x,1))-Asc(Mid(key,KeyPos,1))))
-		KeyPos = KeyPos+1
-		If KeyPos > lenKey Then KeyPos = 1
-	Next
-	Newstr=StrReverse(Newstr)
-	Decrypt = Split(Newstr, "~")(1)
-End Function
+  str=StrReverse(str)
+  For x = LenStr To 1 Step -1
+   Newstr = Newstr & (chr(asc(Mid(str,x,1))-Asc(Mid(key,KeyPos,1))))
+   KeyPos = KeyPos+1
+   If KeyPos > lenKey Then KeyPos = 1
+   Next
+   Newstr=StrReverse(Newstr)
+   Decrypt = Split(Newstr, "~")(1)
+ End Function
 
-'**********************************************************************
-' Function Name: GenericWaitForLoad
-' Purpose: Waits for object image to be not visible
-' Author: Adam Thomas
-' Input:
-'	TimeoutInSeconds
-'	LoadingIconObject
-' Return: none
-' Prerequisites:
-'**********************************************************************
+ 'Author: Adam Thomas
+'Purpose:
+'Modfied By:
 Function GenericWaitForLoad(TimeoutInSeconds, LoadingIconObject)
 	ReportLoaded = False
 	Setting("DefaultLoadTime ")= "1000"
@@ -951,15 +783,9 @@ Function GenericWaitForLoad(TimeoutInSeconds, LoadingIconObject)
 	End If
 End Function
 
-'**********************************************************************
-' Function Name: CheckZero
-' Purpose:
-' Author: Adam Thomas
-' Input:
-' StringInQuestion'
-' Return: Boolean
-' Prerequisites:
-'**********************************************************************
+'Author: Adam Thomas
+'Purpose:
+'Modfied By:
 Function CheckZero(StringInQuestion)
 	AllClear = True
 	StrLen = Len(StringInQuestion)
@@ -977,16 +803,9 @@ Function CheckZero(StringInQuestion)
 End Function
 
 
-'**********************************************************************
-' Function Name: Percentage
-' Purpose:
-' Author: Adam Thomas
-' Input:
-'	Part
-'	Total
-' Return: string og Percentage
-' Prerequisites:
-'**********************************************************************
+'Author: Adam Thomas
+'Purpose:
+'Modfied By:
 Function Percentage(Part, Total)
 	If CInt(Total) = 0 Then
 		Perc = "Cannot divide by zero."
@@ -1028,15 +847,9 @@ Function Percentage(Part, Total)
 	Percentage = Perc
 End Function
 
-'**********************************************************************
-' Function Name: CleanNumber
-' Purpose: strips dollar and comma symbols from string
-' Author: Adam Thomas
-' Input:
-'	NumbertoClean'
-' Return: string
-' Prerequisites:
-'**********************************************************************
+'Author: Adam Thomas
+'Purpose:
+'Modfied By:
 Function CleanNumber(NumbertoClean)
 	NumbertoClean = Replace(NumbertoClean, "$", "")
 	For x = 1 To 10 Step 1
@@ -1045,15 +858,9 @@ Function CleanNumber(NumbertoClean)
 	CleanNumber = NumbertoClean
 End Function
 
-'**********************************************************************
-' Function Name: CountFileLines
-' Purpose: Counts counts lines of file from file path passed.
-' Author: Adam Thomas
-' Input:
-'	FilePath
-' Return: integer
-' Prerequisites:
-'**********************************************************************
+'Author: Adam Thomas
+'Purpose:
+'Modfied By:
 Function CountFileLines(FilePath)
 	Dim objFSO, txsInput, strTemp, arrLines
 	Const ForReading = 1
@@ -1073,17 +880,9 @@ Function CountFileLines(FilePath)
 	Set objFSO = Nothing
 End Function
 
-'**********************************************************************
-' Function Name: LoadBar
-' Purpose:
-' Author:Perry Thomas
-' Input:
-'	OnOffSwitch
-'	BarTitle
-'	MaxSteps
-' Return:
-' Prerequisites:
-'**********************************************************************
+'Author: Perry Thomas
+'Purpose:
+'Modfied By:
 Public Function LoadBar(OnOffSwitch,BarTitle,MaxSteps)
 	'Select on or off switch
 	Select Case Ucase(OnOffSwitch)
@@ -1146,14 +945,9 @@ Public Function LoadBar(OnOffSwitch,BarTitle,MaxSteps)
 	End Select
 End Function
 
-'**********************************************************************
-' Function Name: LoadStep
-' Purpose:
-' Author:Perry Thomas
-' Input:
-' Return:
-' Prerequisites:
-'**********************************************************************
+'Author: Perry Thomas
+'Purpose:
+'Modfied By:
 Public Function LoadStep
 	Set MyForm = Environment("MyForm")
 	Set MyProgressBar = Environment("LoadBar")
@@ -1166,16 +960,9 @@ Public Function LoadStep
 	End If
 End Function
 
-'**********************************************************************
-' Function Name: SelectFromDropDown
-' Purpose:
-' Author: Adam Thomas
-' Input:
-'	DropDownObject
-'	TextToSelect
-' Return: none
-' Prerequisites:
-'**********************************************************************
+'Author: Adam Thomas
+'Purpose:
+'Modfied By:
 Function SelectFromDropDown(DropDownObject, TextToSelect)
 	Set DDO = DropDownObject
 	aList = Split(DDO.GetROProperty("all items"), ";")
@@ -1193,40 +980,25 @@ Function SelectFromDropDown(DropDownObject, TextToSelect)
 	Next
 End Function
 
-'**********************************************************************
-' Function Name: ReportingOff
-' Purpose:
-' Author: Adam Thomas
-' Input: none
-' Return: non3
-' Prerequisites:
-'**********************************************************************
+'Author: Adam Thomas
+'Purpose:
+'Modfied By:
 Function ReportingOff()
 	On Error Resume Next
 	Reporter.Filter = 3
 End Function
 
-'**********************************************************************
-' Function Name: ReportingOn
-' Purpose:
-' Author: Adam Thomas
-' Input: None
-' Return: None
-' Prerequisites:
-'**********************************************************************
+'Author: Adam Thomas
+'Purpose:
+'Modfied By:
 Function ReportingOn()
 	On Error GoTo 0
 	Reporter.Filter = 0
 End Function
 
-'**********************************************************************
-' Function Name: DefaultTimeout
-' Purpose:
-' Author: Adam Thomas
-' Input:
-' Return:
-' Prerequisites:
-'**********************************************************************
+'Author: Adam Thomas
+'Purpose:
+'Modfied By:
 Function DefaultTimeout()
 	If Environment.Value("TO") <>"" Then
 		Setting("DefaultTimeOut")= Environment.Value("TO")
@@ -1235,14 +1007,9 @@ Function DefaultTimeout()
 	End If
 End Function
 
-'**********************************************************************
-' Function Name: ShortTimeout
-' Purpose:
-' Author: Adam Thomas
-' Input: None
-' Return: None
-' Prerequisites: None
-'**********************************************************************
+'Author: Adam Thomas
+'Purpose:
+'Modfied By:
 Function ShortTimeout()
 	Def = Setting("DefaultTimeOut")
 	Setting("DefaultTimeOut")= "500"
@@ -1250,18 +1017,11 @@ Function ShortTimeout()
 	ShortTimeout = Def
 End Function
 
-'**********************************************************************
-' Function Name: IsInArray
-' Purpose:
-' Author: Adam Thomas
-' Input:
-'	ArrayName
-'	SearchString
-' Return:
-' Prerequisites:
-'**********************************************************************
+'Author: Adam Thomas
+'Purpose:
+'Modfied By:
 Function IsInArray(ArrayName,SearchString)
-	FoundString = False
+FoundString = False
 	For Each Node In ArrayName
 		If Node = SearchString Then
 			FoundString = True
@@ -1270,16 +1030,9 @@ Function IsInArray(ArrayName,SearchString)
 	IsInArray = FoundString
 End Function
 
-'**********************************************************************
-' Function Name: DeleteFromArray
-' Purpose:
-' Author: Adam Thomas
-' Input:
-'	ArrayName
-'	TextToDelete
-' Return: Array
-' Prerequisites:
-'**********************************************************************
+'Author: Adam Thomas
+'Purpose:
+'Modfied By:
 Function DeleteFromArray(ArrayName, TextToDelete)
 	AllText = ""
 	For Each Node In ArrayName
@@ -1291,44 +1044,24 @@ Function DeleteFromArray(ArrayName, TextToDelete)
 	DeleteFromArray = Split(AllText, "|||")
 End Function
 
-'**********************************************************************
-' Function Name:ET
-' Purpose: Unknown
-' Author: Adam Thomas
-' Input: none
-' Return: none
-' Prerequisites:
-'	methods:
-'		ExitTestIteration
-'		CleanUp
-'**********************************************************************
+'Author: Adam Thomas
+'Purpose:
+'Modfied By:
 Function ET
 	CleanUp
 	ExitTestIteration
 End Function
 
-'**********************************************************************
-' Function Name: CleanRecovery
-' Purpose: Unknown
-' Author: Adam Thomas
-' Input:
-'	Object'
-' Return:
-' Prerequisites:
-'**********************************************************************
+'Author: Adam Thomas
+'Purpose:
+'Modfied By:
 Function CleanRecovery(Object)
 
 End Function
 
-'**********************************************************************
-' Function Name:
-' Purpose: returns text from clipboard. Can negatively effect ALM reporting
-'	on some versions.
-' Author: Adam Thomas
-' Input: None
-' Return: None
-' Prerequisites:
-'**********************************************************************
+'Author: Adam Thomas
+'Purpose: returns text from clipboard. Can negatively effect ALM reporting on some versions.
+'Modfied By:
 Function GetClipBoardText()
 
 	Set objHTML = CreateObject("htmlfile")
@@ -1338,126 +1071,87 @@ Function GetClipBoardText()
 
 
 	'Set objIE = CreateObject("InternetExplorer.Application")
-	' objIE.Navigate("about:blank")
-	' GetClipBoardText = objIE.document.parentwindow.clipboardData.GetData("text")
-	' objIE.Quit
+    ' objIE.Navigate("about:blank")
+    ' GetClipBoardText = objIE.document.parentwindow.clipboardData.GetData("text")
+    ' objIE.Quit
 End Function
 
-'**********************************************************************
-' Function Name: GetWebEditValue
+
+' Author: Brian Buckhana
 ' Purpose: Returns a Web Edit's current value.
-' Author:Brian Buckhana
-' Input:
-'	WebEditObject'
-' Return: string
-' Prerequisites: none
-'**********************************************************************
+' Modified By:
 Function GetWebEditValue(WebEditObject)
-	GetWebEditValue = WebEditObject.GetROProperty("value")
+	Set WE = WebEditObject
+	GetWebEditValue = WE.GetROProperty("value")
 End Function
 
-'**********************************************************************
-' Function Name: GetWebListValue
+' Author: Brian Buckhana
 ' Purpose: Returns a Web List's current value.
-' Author: Brian Buckhana
-' Input:
-'	WebListObject
-' Return: string
-' Prerequisites: none
-'**********************************************************************
+' Modified By:
 Function GetWebListValue(WebListObject)
-	GetWebListValue = WebListObject.GetROProperty("value")
+	Set WL = WebListObject
+	GetWebListValue = WL.GetROProperty("value")
 End Function
 
-'**********************************************************************
-' Function Name: GetCheckboxValue
-' Purpose: Returns a Web Checkbox's current value.
-' Author:Brian Buckhana
-' Input:
-'	CheckboxObject'
-' Return: string
-' Prerequisites: None
-'**********************************************************************
-Function GetCheckboxValue(CheckboxObject)
-	GetCheckboxValue = CheckboxObject.GetROProperty("checked")
-End Function
-
-'**********************************************************************
-' Function Name: GetWebElementValue
-' Purpose: Returns a Web Element's current value.
-' Author:Brian Buckhana
-' Input:
-'	 WebElementObject'
-' Return: string
-' Prerequisites: None
-'**********************************************************************
-Function GetWebElementValue(WebElementObject)
-	GetWebElementValue = WebElementObject.GetROProperty("innertext")
-End Function
-
-'**********************************************************************
-' Function Name: GetWebRadioGroupValue
-' Purpose: Returns a Web Radio Group's current value.
 ' Author: Brian Buckhana
-' Input:
-'	WebRadioGroup'
-' Return: string
-' Prerequisites: None
-'**********************************************************************
-Function GetWebRadioGroupValue(WebRadioGroup)
-	GetWebRadioGroupValue = WebRadioGroupObject.GetROProperty("value")
+' Purpose: Returns a Web Checkbox's current value.
+' Modified By:
+Function GetCheckboxValue(CheckboxObject)
+	Set CB = CheckboxObject
+	GetCheckboxValue = CB.GetROProperty("checked")
 End Function
 
-'**********************************************************************
-' Function Name: SetCheckbox
-' Purpose: Sets a checkbox to checked or not checked based on parameter data. Blank parameter is not checked, and any 'select' key work will select it.
-' Author: Adam Thomas
-' Input:
-'	CheckBoxObject
-'	Parameter
-' Return: None
-' Prerequisites: None
-'**********************************************************************
+' Author: Brian Buckhana
+' Purpose: Returns a Web Element's current value.
+' Modified By:
+Function GetWebElementValue(WebElementObject)
+	Set WE = WebElementObject
+	GetWebElementValue = WE.GetROProperty("innertext")
+End Function
+
+' Author: Brian Buckhana
+' Purpose: Returns a Web Radio Group's current value.
+' Modified By:
+Function GetWebRadioGroupValue(WebRadioGroup)
+	Set WRG = WebRadioGroupObject
+	GetWebRadioGroupValue = WE.GetROProperty("value")
+End Function
+
+'Author: Adam Thomas
+'Purpose: Sets a checkbox to checked or not checked based on parameter data. Blank parameter is not checked, and any 'select' key work will select it.
+'Modfied By: Brian Buckhana
 Function SetCheckbox(CheckBoxObject, Parameter)
+	Set CB = CheckBoxObject
+
 	If Parameter <> "" Then
 		Select Case UCase(Parameter)
 			Case "ON", "SELECT", "SELECTED", "CHECK", "CHECKED", TRUE, "TRUE"
-				CheckBoxObject.Set "ON"
+				CB.Set "ON"
 			Case Else
-				CheckBoxObject.Set "OFF"
+				CB.Set "OFF"
 		End Select
 	End If
 End Function
 
-'**********************************************************************
-' Function Name:SetWebRadioGroup
-' Purpose: Sets a web radio group based on parameter data.
-' Author:Brian Buckhana
-' Input:
-'	WebRadioGroupObject
-'	Parameter
-' Return: None
-' Prerequisites: None
-'**********************************************************************
+'Author: Brian Buckhana
+'Purpose: Sets a web radio group based on parameter data.
+'Modfied By:
 Function SetWebRadioGroup(WebRadioGroupObject, Parameter)
+	Set WRG = WebRadioGroupObject
+
 	If Parameter <> "" Then
 		Select Case UCase(Parameter)
 			Case "ON", "YES", "SELECT", "SELECTED", "CHECK", "CHECKED", TRUE, "TRUE", "1"
-				WebRadioGroupObject.Select "1"
+				WRG.Select "1"
 			Case Else
-				WebRadioGroupObject.Select "0"
+				WRG.Select "0"
 		End Select
 	End If
 End Function
 
-'**********************************************************************
-' Function Name: RandomString
-' Purpose: Returns a truely unique string of all caps characters
-' Author: Adam Thomas
-' Input: None
-' Return: None
-' Prerequisites: None
-'**********************************************************************
+'Author: Adam Thomas
+'Purpose: Returns a truely unique string of all caps characters
+'Modfied By:
 Function RandomString()
 
 	S = Second(Now)
@@ -1480,14 +1174,9 @@ Function RandomString()
 
 End Function
 
-'**********************************************************************
-' Function Name: RandomSS
-' Purpose: Returns a unique social security number. Does not comply with all SS rules
-' Author: Adam Thomas
-' Input: None
-' Return: string
-' Prerequisites: None
-'**********************************************************************
+'Author: Adam Thomas
+'Purpose: Returns a unique social security number. Does not comply with all SS rules
+'Modfied By:
 Function RandomSS()
 	S = Second(Now)
 	MN = Minute(Now)
@@ -1501,17 +1190,10 @@ Function RandomSS()
 
 End Function
 
-'**********************************************************************
-' Function Name: SetWebEdit
-' Purpose: Sets a webedit to a value if parameter has data. Blank parameter will skip the web edit all together
-' Author: Adam Thomas
-' Modfied By: Brian Buckhana
-' Input:
-'	WebEditObject
-'	Parameter
-' Return: none
-' Prerequisites: none
-'**********************************************************************
+
+'Author: Adam Thomas
+'Purpose: Sets a webedit to a value if parameter has data. Blank parameter will skip the web edit all together
+'Modfied By: Brian Buckhana
 Function SetWebEdit(WebEditObject, Parameter)
 	Set oWE = WebEditObject
 
@@ -1535,20 +1217,9 @@ Function SetWebEdit(WebEditObject, Parameter)
 	End If
 End Function
 
-
-'**********************************************************************
-' Function Name: SetWebElement
-' Purpose:
-'Modfied By: Brian Buckhana
-' Author: Adam Thomas
-' Input:
-'	WebElementObject
-'	Parameter
-' Return: none
-' Prerequisites:
-'	Methods:
-'		SendKeys
-'**********************************************************************
+'Author: Adam Thomas
+'Purpose:
+'Modfied By:
 Function SetWebElement(WebElementObject, Parameter)
 	Set oWE = WebElementObject
 
@@ -1570,16 +1241,10 @@ Function SetWebElement(WebElementObject, Parameter)
 	End If
 End Function
 
-'**********************************************************************
-' Function Name: SetWebList
-' Purpose: Sets a weblist to a value if parameter has data. Blank parameter will skip the web list all together
-' Author: Adam Thomas
-' Input:
-'	WebListObject
-'	Parameter
-' Return: none
-' Prerequisites: none
-'**********************************************************************
+
+'Author: Adam Thomas
+'Purpose: Sets a weblist to a value if parameter has data. Blank parameter will skip the web list all together
+'Modfied By:
 Function SetWebList(WebListObject, Parameter)
 	Set oWL = WebListObject
 
@@ -1597,17 +1262,9 @@ Function SetWebList(WebListObject, Parameter)
 	End If
 End Function
 
-'**********************************************************************
-' Function Name: VerifyObjectEnabled
-' Purpose: Verifies if an object is enabled/disabled and reports back this status.
 ' Author: Brian Buckhana
-' Input:
-'	WebObject
-'	ObjectType
-'	ExpectedEnablement
-' Return: Setting
-' Prerequisites: nona
-'**********************************************************************
+' Purpose: Verifies if an object is enabled/disabled and reports back this status.
+' Modified By:
 Function VerifyObjectEnabled(WebObject, ObjectType, ExpectedEnablement)
 	Set object = WebObject
 '	enabled = object.GetROProperty("disabled")
@@ -1634,15 +1291,9 @@ Function VerifyObjectEnabled(WebObject, ObjectType, ExpectedEnablement)
 
 End Function
 
-'**********************************************************************
-' Function Name: ParameterValue
-' Purpose:
-' Author: Adam Thomas
-' Input:
-'	ParameterText
-' Return: string
-' Prerequisites: none
-'**********************************************************************
+'Author: Adam Thomas
+'Purpose:
+'Modfied By:
 Function ParameterValue(ParameterText)
 	If ParameterText <> "" Then
 		ParameterValue = Split(ParameterText, "#")(0)
@@ -1651,16 +1302,9 @@ Function ParameterValue(ParameterText)
 	End If
 End Function
 
-'**********************************************************************
-' Function Name: ParameterDescription
-' Purpose:
-' Author: Adam Thomas
-' Input:
-'	ParameterText
-'	DefaultDescription
-' Return: string
-' Prerequisites: none
-'**********************************************************************
+'Author: Adam Thomas
+'Purpose:
+'Modfied By:
 Function ParameterDescription(ParameterText, DefaultDescription)
 	If ParameterText <> "" Then
 		If UBound(Split(ParameterText, "#")) = 1 Then
@@ -1674,21 +1318,15 @@ Function ParameterDescription(ParameterText, DefaultDescription)
 
 End Function
 
-'**********************************************************************
-' Function Name: VerifyCheckbox
-' Purpose: Verifies a checkbox to whether it is checked or not checked based on parameter data.
-' Modfied By: Brian Buckhana
-'  Author:Adley Haywood
-' Input:
-'	CheckBoxObject
-'	Parameter
-' Return: none
-' Prerequisites: None
-'**********************************************************************
+
+'Author: Adley Haywood
+'Purpose: Verifies a checkbox to whether it is checked or not checked based on parameter data.
+'Modfied By: Brian Buckhana
 Function VerifyCheckbox(CheckBoxObject, Parameter)
 	Dim stringLength
 	Dim Verify
 	Set CB = CheckBoxObject
+
 
 '	HID = CB.GetROProperty("html id")
 
@@ -1736,20 +1374,9 @@ Function VerifyCheckbox(CheckBoxObject, Parameter)
 	End If
 End Function
 
-'**********************************************************************
-' Function Name: erifyCheckboxReverse
-' Purpose:
-' Author: Adam Thomas
-' Input:
-'	CheckBoxObject
-'	Parameter
-' Return: none
-' Prerequisites:
-'	methods:
-'		ParameterDescription
-''		ParameterValue
-
-'**********************************************************************
+'Author: Adam Thomas
+'Purpose:
+'Modfied By:
 Function VerifyCheckboxReverse(CheckBoxObject, Parameter)
 	Dim stringLength
 	Dim Verify
@@ -1802,20 +1429,9 @@ Function VerifyCheckboxReverse(CheckBoxObject, Parameter)
 	End If
 End Function
 
-'**********************************************************************
-' Function Name: VerifyWebEdit
-' Purpose: Verifies a webedit has the value of parameter passed in.
+'Author: Adley Haywood
+'Purpose: Verifies a webedit has the value of parameter passed in.
 'Modfied By: Brian Buckhana
-' Author:Adley Haywood
-' Input:
-'	WebEditObject
-'	Parameter
-' Return: None
-' Prerequisites:
-'	methods:
-'		ParameterDescription
-''		ParameterValue
-'**********************************************************************
 Function VerifyWebEdit(WebEditObject, Parameter)
 	Dim stringLength
 	Dim Verify
@@ -1861,19 +1477,9 @@ Function VerifyWebEdit(WebEditObject, Parameter)
 	End If
 End Function
 
-'**********************************************************************
-' Function Name: VerifyVarText
-' Purpose:
-' Author: Adam Thomas
-' Input:
-'	TextVariable
-'	Parameter
-' Return:
-' Prerequisites:
-'	methods:
-'		ParameterDescription
-'		ParameterValue
-'**********************************************************************
+'Author: Adam Thomas
+'Purpose:
+'Modfied By:
 Function VerifyVarText(TextVariable, Parameter)
 	Dim stringLength
 	Dim Verify
@@ -1908,20 +1514,9 @@ Function VerifyVarText(TextVariable, Parameter)
 
 End Function
 
-'**********************************************************************
-' Function Name: VerifyWebList
-' Purpose: Verifies a weblist has the value of parameter passed in.
+'Author: Adley Haywood
+'Purpose: Verifies a weblist has the value of parameter passed in.
 'Modfied By: Brian Buckhana
-' Author:Adam Thomas
-' Input:
-'	WebListObject
-'	Parameter
-' Return: none
-' Prerequisites:
-'	methods:
-'		ParameterDescription
-''		ParameterValue
-'**********************************************************************
 Function VerifyWebList(WebListObject, Parameter)
 	Dim stringLength
 	Dim Verify
@@ -1970,16 +1565,9 @@ Function VerifyWebList(WebListObject, Parameter)
 	End If
 End Function
 
-'**********************************************************************
-' Function Name: VerifyWebImage
-' Purpose: Verifies an image exists.
-' Author:Brain Buckhana
-' Input:
-'	WebImageObject
-'	WebImageName
-' Return: none
-' Prerequisites: none
-'**********************************************************************
+'Author: Brian Buckhana
+'Purpose: Verifies an image exists.
+'Modfied By:
 Function VerifyWebImage(WebImageObject, WebImageName)
 
 	' Made it an if-else in case more functionality is to be added later.
@@ -1991,19 +1579,9 @@ Function VerifyWebImage(WebImageObject, WebImageName)
 
 End Function
 
-'**********************************************************************
-' Function Name: VerifyWebLink
-' Purpose: Verifies a weblink has the value of parameter passed in.
-' Author:Brian Buckhana
-' Input:
-'	WebLinkObject
-'	Parameter
-' Return:
-' Prerequisites:
-'	methods:
-'		ParameterDescription
-''		ParameterValue
-'**********************************************************************
+'Author: Brian Buckhana
+'Purpose: Verifies a weblink has the value of parameter passed in.
+'Modfied By:
 Function VerifyWebLink(WebLinkObject, Parameter)
 	Dim exists
 	Dim Verify
@@ -2032,19 +1610,9 @@ Function VerifyWebLink(WebLinkObject, Parameter)
 	End If
 End Function
 
-'**********************************************************************
-' Function Name:
-' Purpose: Verifies an object exists and provides a report for it.  Saves time from writing multiple "If, Else" statements.
-' Author: Brian Buckhana
-' Input:
-' Return:
-' Prerequisites:
-'	methods
-'		ShortTimeOut
-'		ReportingOff
-'		ReportingOn
-'		DefaultTimeOut
-'**********************************************************************
+'Author: Brian Buckhana
+'Purpose: Verifies an object exists and provides a report for it.  Saves time from writing multiple "If, Else" statements.
+'Modfied By:
 Function VerifyObjectExists(WebObject, Timeout, ObjectName)
 	ShortTimeOut
 	Set WO = WebObject
@@ -2063,21 +1631,9 @@ Function VerifyObjectExists(WebObject, Timeout, ObjectName)
 	DefaultTimeOut
 End Function
 
-'**********************************************************************
-' Function Name:VerifyWebElement
-' Purpose: Verifies a weblist has the value of parameter passed in.
+'Author: Adley Haywood
+'Purpose: Verifies a weblist has the value of parameter passed in.
 'Modfied By: Brian Buckhana
-' Author:Adley Haywood
-' Input:
-'	WebElementObject
-'	Parameter
-' Return:
-' Prerequisites:
-'	Methods:
-'		ParameterDescription
-'		VerifyObjectExists
-'		ParameterValue
-'**********************************************************************
 Function VerifyWebElement(WebElementObject, Parameter)
 	Dim stringLength
 	Dim Verify
@@ -2113,21 +1669,9 @@ Function VerifyWebElement(WebElementObject, Parameter)
 	End If
 End Function
 
-'**********************************************************************
-' Function Name: VerifyWebRadioGroup
-' Purpose: Verifies a web radio group based on parameter data.
+'Author: Adley Haywood
+'Purpose: Verifies a web radio group based on parameter data.
 'Modfied By: Brian Buckhana
-' Author:Adley Haywood
-' Input:
-'	WebRadioGroupObject
-'	Parameter
-' Return:
-' Prerequisites:
-'	Methods:
-'		VerifyObjectExists
-'		ParameterDescription
-'		ParameterValue
-'**********************************************************************
 Function VerifyWebRadioGroup(WebRadioGroupObject, Parameter)
 	Dim stringLength
 	Dim Verify
@@ -2175,20 +1719,9 @@ Function VerifyWebRadioGroup(WebRadioGroupObject, Parameter)
 
 End Function
 
-'**********************************************************************
-' Function Name: VerifyWebRadioGroupReverse
-' Purpose:
-' Author: Unknown
-' Input:
-'	WebRadioGroupObject
-'	Parameter
-' Return: None
-' Prerequisites:
-'	Methods:
-'		VerifyObjectExists
-'		ParameterDescription
-'		ParameterValue
-'**********************************************************************
+'Author: Unknown
+'Purpose:
+'Modfied By:
 Function VerifyWebRadioGroupReverse(WebRadioGroupObject, Parameter)
 	Dim stringLength
 	Dim Verify
@@ -2236,42 +1769,35 @@ Function VerifyWebRadioGroupReverse(WebRadioGroupObject, Parameter)
 
 End Function
 
-'**********************************************************************
-' Function Name: MouseoverWebElement
-' Purpose: Mouses over web element and performs the action you want performed.
-' Author: Brian Buckhana
-' Input:
-'	WebElementObject
-'	ActionOfWebElement
-'	Parameter
-' Return: None
-' Prerequisites:
-'	methods:
-'		ParameterDescription
-''		ParameterValue
-'**********************************************************************
+'Author: Brian Buckhana
+'Purpose: Mouses over web element and performs the action you want performed.
+'Modfied By:
 Function MouseoverWebElement(WebElementObject, ActionOfWebElement, Parameter)
 	Set oWL = WebElementObject
-	OrigVal = Setting.WebPackage("ReplayType")
+	HID = oWL.GetROProperty("html id")
+
 	Select Case UCase(ActionOfWebElement)
 		Case "CLICK"
 			Setting.WebPackage("ReplayType") = 2
 			oWL.FireEvent "onmouseover"
 			oWL.Click
+			Setting.WebPackage("ReplayType") = 1
 		Case "ENTER VALUE", "ENTERVALUE", "TYPE", "SET"
 			Setting.WebPackage("ReplayType") = 2
 			oWL.FireEvent "onmouseover"
 			oWL.Set Parameter
+			Setting.WebPackage("ReplayType") = 1
 		Case Else
 			Setting.WebPackage("ReplayType") = 2
 			oWL.FireEvent "onmouseover"
+			Setting.WebPackage("ReplayType") = 1
 	End Select
-	Setting.WebPackage("ReplayType") = OrigVal
 End Function
 
+
 '**********************************************************************
-'Function Name: GetColumnWithCellText
-'Purpose: '
+'Function Name:	GetColumnWithCellText
+'
 'Call Function Using: objWebTable.GetColumnWithCellText(strSearchText, intSearchRow, blnExact)
 '
 '
@@ -2302,10 +1828,7 @@ End Function
 'Register the GetColumnWithCellText method
 ' Sample implementation:
 ' RegisterUserFunc "WebTable", "GetColumnWithCellText", "GetColumnWithCellText"
-' Input:
-' Return: integer
-' Prerequisites:
-'**********************************************************************
+
 Public Function GetColumnWithCellText(objTable, strSearchText, intSearchRow, blnExact)
 	Dim intNumColumns
 	Dim intCurrentColumn
