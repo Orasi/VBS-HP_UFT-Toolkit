@@ -48,12 +48,14 @@ Class Excel
 		'Supress any warnings
 		objExcel.Application.DisplayAlerts = False
 		'Open source file
-		Set objWorkbook = objExcel.Workbooks.Open(FilePath)
-		'Find Cell containing search string
-		If Sheet <> "" Then
-			objWorkbook.sheets(Sheet).Activate
+		If FilePath <> "" Then
+			Set objWorkbook = objExcel.Workbooks.Open(FilePath)
+			'Find Cell containing search string
+			If Sheet <> "" Then
+				objWorkbook.sheets(Sheet).Activate
+			End If
+			Set objSheet = objWorkbook.ActiveSheet
 		End If
-		Set objSheet = objWorkbook.ActiveSheet
 	End Function
 	
 	Public Function Find(SearchString, Range, RowOrCol)
@@ -74,6 +76,40 @@ Class Excel
 			Reporter.ReportEvent micWarning, "Excel Find Function", "Excel could not find a value of: " & SearchString & " in the given range of: " & Range
 	    	Find = 0
 		End If
+	End Function
+	
+	
+	Public Function OpenWorkbook(FilePath)
+			Set objWorkbook = objExcel.Workbooks.Open(FilePath)
+			Set objSheet = objWorkbook.ActiveSheet
+	End Function
+	
+	Public Function GetTabCount()
+		GetTabCount = objWorkbook.sheets.Count
+	End Function
+	
+	Public Function SetTab(TabNameOrNumber)
+		objWorkbook.sheets(TabNameOrNumber).Activate
+		Set objSheet = objWorkbook.ActiveSheet
+	End Function
+	
+	Public Function SetTabName(TabNameOrNumber, TabName)
+		SetTab(TabNameOrNumber)
+		objSheet.Name = TabName
+	End Function
+	
+	Public Function GetTabName(TabNumber)
+		If TabNumber <> "" Then
+			SetTab(TabNumber)
+		End If
+		
+		GetTabName = objSheet.Name
+	End Function
+	
+	Public Function SaveAndClose()
+		SetTab 1
+		objWorkbook.Save()
+		objWorkbook.Close()
 	End Function
 	
 	Public Function ReturnRangeOfValues(Range)
@@ -157,7 +193,9 @@ Class Excel
 
 	
 	Public Function Destruct()
-		objWorkbook.Close
+		On Error Resume Next
+			objWorkbook.Close
+		On Error Goto 0
 		Set objExcel = Nothing
 		Set objWorkbook = Nothing
 		Set objSheet = Nothing
