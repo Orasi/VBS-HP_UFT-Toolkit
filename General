@@ -1,5 +1,7 @@
-﻿'Author: Adam Thomas
-'Purpose: returns a true or false based on whether an iteration number falls withing an adanvced range
+
+'**********************************************************************
+' Function Name: RunIteration
+' Purpose: returns a true or false based on whether an iteration number falls withing an adanvced range
 '	Samples of an (advanced)iteration range are as follows:
 '	IterationRange = "1,2,3,4-10"
 '	IterationRange2 = "4-10"
@@ -10,7 +12,14 @@
 '	IterationRange7 = "<LAST>"
 '	IterationRange8 = "2,7,8"
 '	IterationRange9 = "1"
-'Modfied By:
+' Author: Adam Thomas at Orasi Software Inc.
+' Input:
+'	CurrentIteration Document CurrentIteration
+'	IterationRange Document IterationRange
+'	LastRow Document LastRow
+' Return: Boolean Tell caller whether to run the current iteration or not
+' Prerequisites: none
+'**********************************************************************
 Function RunIteration(CurrentIteration, IterationRange, LastRow)
 	CI = CStr(CurrentIteration)
 	IR = Trim(UCase(IterationRange))
@@ -56,9 +65,27 @@ Function RunIteration(CurrentIteration, IterationRange, LastRow)
 	RunIteration = Result
 End Function
 
-'Author: Adam Thomas
-'Purpose: Retrieves parameter data from the data sheet attached to the current test case
-'Modfied By:
+'**********************************************************************
+' Function Name: GetTestParameter
+' Purpose: Retrieves parameter data from the data sheet attached to the
+'	current test case
+' Author: Adam Thomas at Orasi Software Inc.
+' Input:
+'	TestParameter Document TestParameter
+'	Iteration Document Iteration
+' Return: Strring Test parameters
+' Prerequisites:
+'	Method GetCurrentTestID This is located in the ALM Libary. The
+'		ALM Test id for the test currently executing
+'	Method GetSystemTempFolder Loacated in Filessystem libray. Gets a
+'		String of the current users temporary folder path.
+'	Method DownloadAttachmentFromTest This is in the ALM Library.
+'		Downloads an attachment from any test to a local/network path.
+'	Method InstantiateExcel This is located in the EXCEL libary.  Use to
+'		Instantiate an Excel sheet.
+'	Sheet "TestData.xlsx"   File used to hold data
+' REVIEW Recommend check to see if '"TestData.xlsx" exist
+'**********************************************************************
 Function GetTestParameter(TestParameter, Iteration)
 	CurrentTestID = GetCurrentTestID()
 	TempFolder = GetSystemTempFolder()
@@ -69,9 +96,23 @@ Function GetTestParameter(TestParameter, Iteration)
 	DS.Destruct
 End Function
 
-'Author: Adam Thomas
-'Purpose: Retrieves the amount of rows that contain data from the TestData.xlsx that is attached the the scenario/driver(test)
-'Modfied By:
+'**********************************************************************
+' Function Name: GetScenarioDataRowCount
+' Purpose: Retrieves the count of rows that contain data from the TestData.xlsx
+'   that is attached the the scenario/driver(test)
+' Author: Adam Thomas at Orasi Software Inc.
+' Input:
+'   ScenarioTestID  Get input
+' Return: Integer of Rows
+' Prerequisites:
+'  Method CreateTempFolder This is in the FileSystem Library. Creates a Temporary
+'   folder with path provided
+'  Method DownloadAttachmentFromTest This is in the ALM Library.
+'	Downloads an attachment from any test to a local/network path.
+'  Method InstantiateExcel This is located in the EXCEL libary.  Use to
+'		Instantiate an Excel sheet.
+'  Method DeleteFileByPath Delete a File from the path provided
+'**********************************************************************
 Function GetScenarioDataRowCount(ScenarioTestID)
 	TempFolder = CreateTempFolder("C:\Temp\UFT\")
 	AttachPath = DownloadAttachmentFromTest(ScenarioTestID, "TestData.xlsx", TempFolder)
@@ -81,9 +122,18 @@ Function GetScenarioDataRowCount(ScenarioTestID)
 	DeleteFileByPath AttachPath
 End Function
 
-'Author: Adam Thomas
-'Purpose: Gets data from the data table and converts any key words to the appropriate string
-'Modfied By:
+'**********************************************************************
+' Function Name: GetData
+' Purpose: Gets data from the data table and converts any key word
+'   to the appropriate string
+' Author: Adam Thomas at Orasi Software Inc.
+' Input:
+'  Object DatableObject UFT Data Table Object
+'   Varaible Parameter Keyword to be processes
+' Return:
+'   GetData the value requested'
+' Prerequisites: none
+'**********************************************************************
 Function GetData(DatableObject, Parameter)
 	Set DT = DatableObject
 	TempData = DT.GetParameter(Parameter)
@@ -99,12 +149,22 @@ Function GetData(DatableObject, Parameter)
 
 End Function
 
-
-'Author: Adam Thomas
-'Purpose: Selects an item from a dropdown ONLY if there is data provided in the parameter
-'Modfied By:
-' Sample implementation:
-' RegisterUserFunc "SwfComboBox", "SelectOptional", "SetSelectOptional"
+'**********************************************************************
+' Function Name: SetSelectOptional
+' Purpose: Selects an item from a dropdown ONLY if there is data provided
+'   in the parameter
+'   Sample implementation:
+'   RegisterUserFunc "SwfComboBox", "SelectOptional", "SetSelectOptional"
+' Author: Adam Thomas at Orasi Software Inc.
+' Input:
+'   SelectObject  Object to which has the selection
+'   DatatableObject   UFT Data table object
+'   Parameter  Value to select on object from UFT Data Table.
+' Return: None
+' Prerequisites:
+'   Method GetData From the General Library.  Gets data from the data table
+'       and converts any key word to the appropriate string
+'**********************************************************************
 Function SetSelectOptional(SelectObject, DatatableObject, Parameter)
 	SelectData = GetData(DatatableObject, Parameter)
 	Set SO = SelectObject
@@ -113,11 +173,21 @@ Function SetSelectOptional(SelectObject, DatatableObject, Parameter)
 	End If
 End Function
 
-
-
-
-' Sample implementation:
-'RegisterUserFunc "SwfComboBox", "SelectEnhanced", "SelectNullAllItemsCombo"
+'**********************************************************************
+' Function Name: SelectNullAllItemsCombo @99
+' Purpose: QUESTION Purpose Function Name: SelectNullAllItemsCombo?
+'   Sample implementation:
+'   RegisterUserFunc "SwfComboBox", "SelectEnhanced", "SelectNullAllItemsCombo"
+' Author: Unknown
+' Input:
+'   ComboBoxObject Combo box object
+'   ItemText Item to be selected.
+' Return: none
+' Prerequisites:
+'   Method SendKeys This is in the General Library. Sends key strokes to any
+'       active window or object
+'   Object Reporter.ReportEvent
+'**********************************************************************
 Function SelectNullAllItemsCombo(ComboBoxObject, ItemText)
 	SuccessFlag = False
 	Set CO = ComboBoxObject
@@ -151,15 +221,24 @@ Function SelectNullAllItemsCombo(ComboBoxObject, ItemText)
 		Reporter.ReportEvent micFail, "Select from Combobox", "Combo object name: " & Name _
 		& ML(2) & "Item requested: " & ItemText & ML(2) & "Value Selected: " & CurValue
 	End If
-
 End Function
 
-
-
-
-'Author: Adam Thomas
-'Purpose: Pulls data from the TestData.xls attached to a test id and loads it into the datable and sets the current rom being read from
-'Modfied By:
+'**********************************************************************
+' Function Name: SetUpComponentData
+' Purpose: Pulls data from the TestData.xls attached to a test id and loads
+'   it into the datatable and sets the current row being read from
+' Author: Adam Thomas at Orasi Software Inc.
+' Input:
+'   ScenarioTestID
+'   IterationID
+' Return:
+'   UFT Test DataTable
+' Prerequisites:
+'  Method GetTestData This is in the General Libarary. Retrieves the data sheet
+'    attached to the current test case
+'  Method DeleteFileByPath Delete a File from the path provided
+'  Object Reporter.ReportEvent  used to report issue to UFT results.
+'**********************************************************************
 Function SetUpComponentData(ScenarioTestID, IterationID)
 	SuccessFlag = False
 	DataPath = GetTestData(ScenarioTestID)
@@ -194,10 +273,20 @@ Function SetUpComponentData(ScenarioTestID, IterationID)
 
 End Function
 
-
-'Author: Adam Thomas
-'Purpose: Pushes the datatable to the scenario(test) Id as an attachment
-'Modfied By:
+'**********************************************************************
+' Function Name: UploadComponentData
+' Purpose: Pushes the datatable to the scenario(test) Id as an attachment
+' Author: Adam Thomas at Orasi Software Inc.
+' Input:
+' ScenarioTestID  test ID
+' Return: none
+' Prerequisites:
+'  Method RenameAttachmentFromTest This is in the ALM Function Library.
+'  Method UploadAttachmentToTest  This is in the ALM Function Library.
+'     Uploads an attachment to any test from a local/network path
+'  Method RemoveAttachmentFromTest This is in the ALM Function Library.
+'     Removes an attachment from any test
+'**********************************************************************
 Function UploadComponentData(ScenarioTestID)
 	TempFolder = CreateTempFolder("C:\Temp\UFT\")
 	DataTable.ExportSheet TempFolder & "TestData.xlsx", DTLocalSheet, "Sheet1"
@@ -209,21 +298,54 @@ Function UploadComponentData(ScenarioTestID)
 	RemoveAttachmentFromTest ScenarioTestID, "TestData - BACKUP.xlsx"
 End Function
 
-'Author: Adam Thomas
-'Purpose: Retrieves the data sheet attached to the current test case
-'Modfied By:
+'**********************************************************************
+' Function Name: GetTestData
+' Purpose: Retrieves the data sheet attached to the current test case
+' Author: Adam Thomas at Orasi Software Inc.
+' Input:
+'   ScenarioTestID
+' Return: none
+' Prerequisites:
+'  Method CreateTempFolder
+'  Method DownloadAttachmentFromTest This is in the ALM Library.
+'	Downloads an attachment from any test to a local/network path.
+'  Permission to write to "C:\Temp\UFT\"
+'**********************************************************************
 Function GetTestData(ScenarioTestID)
 	TempFolder = CreateTempFolder("C:\Temp\UFT\")
 	GetTestData = DownloadAttachmentFromTest(ScenarioTestID, "TestData.xlsx", TempFolder)
 End Function
 
-'Author: Adam Thomas
-'Purpose: Uses the IE download prompt to same and locate a file being saved from IE
-'Modfied By:
+'**********************************************************************
+' Function Name: IESave
+' Purpose: Uses the IE download prompt to same and locate a file being saved from IE
+' Author: Adam Thomas at Orasi Software Inc.
+' Input:
+'   Timeout
+' Return: Return the path to the last downloaded file
+' Prerequisites:
+'  Method GetLatestDownload This is in the FileSystem Library.
+'     Return the path to the last downloaded file
+'  Object Browser("GenericBrowser").WinObject("Notification bar").WinToolbar("Notification bar")
+'     needs to be in UFT Object Repository
+'  Object Browser("GenericBrowser").WinObject("Notification bar").WinButton("Close")
+'     needs to be in UFT Object Repository
+'  Object Browser("Browser").Dialog("Windows Internet Explorer").WinButton("Save")
+'    needs to be in UFT Object Repository.
+'  Object Browser("GenericBrowser").WinObject("Notification bar").WinButton("Close")
+'    needs to be in UFT Object Repository.
+'  Object Browser("Oracle BI Interactive").WinObject("Notification bar").WinButton("Save")
+'    needs to be in UFT Object Repository.
+'  Object Browser("Oracle BI Interactive").WinObject("Notification bar").WinButton("Close")
+'    needs to be in UFT Object Repository.
+'  Object  reporter.ReportEvent Uses UFT report tool for log results.
+'   Method ReportingOff This is located in General library.
+'   Method ReportingOn This is located in General library.
+'BUG  Function Name: IESave Need to store the current DefaultTimeOut and set it back when function is done'
+'**********************************************************************
 Function IESave(Timeout)
 	ReportingOff
 	PossibleOldDL = GetLatestDownload()
-
 	Setting("DefaultTimeOut")= "500"
 	Break = False
 	Success = False
@@ -281,9 +403,19 @@ Function IESave(Timeout)
 	Setting("DefaultTimeOut")= "30000"
 End Function
 
-'Author: Adam Thomas
-'Purpose: Prepares a machine for test excecution
-'Modfied By:
+'**********************************************************************
+' Function Name: CleanUp
+' Purpose: Prepares a machine for test excecution
+' Author: Adam Thomas at Orasi Software Inc.
+' Input: none
+' Return: none
+' Prerequisites:
+'   Method ReportingOff This is located in General library.
+'   Method ReportingOn This is located in General library.
+'   Method ShortTimeout This is located in General library.
+'   Method DefaultTimeout This is located in General library.
+'   Object Reporter.ReportEvent This is located in General library.
+'**********************************************************************
 Public Function CleanUp()
 	ReportingOff
 	StartTime = Timer
@@ -362,20 +494,39 @@ Public Function CleanUp()
 End Function
 
 
-' Author: Adam Thomas
+'**********************************************************************
+' Function SendKeys
 ' Purpose: Sends key strokes to any active window or object
-' Prerequisites: object keystrokes are intended for MUST be activated and at the top layer of the screen
-'Useful Keys: {BACKSPACE}, {BS}, or {BKSP} {BREAK} {CAPSLOCK} {DELETE} or {DEL} {DOWN} {END} {ENTER} or ~{ESC} {HELP} {HOME} {INSERT} or {INS} {LEFT} {NUMLOCK} {PGDN} {PGUP} {PRTSC} {RIGHT} {SCROLLLOCK} {TAB} {UP} {F1} {F2} {F3} {F4} {F5} {F6} {F7} {F8} {F9} {F10} {F11} {F12} {F13} {F14} {F15} {F16}
+'   object keystrokes are intended for MUST be activated and at the top layer of the screen
+'   Useful Keys: {BACKSPACE}, {BS}, or {BKSP} {BREAK} {CAPSLOCK}
+'   {DELETE} or {DEL} {DOWN} {END} {ENTER} or ~{ESC} {HELP} {HOME}
+'   {INSERT} or {INS} {LEFT} {NUMLOCK} {PGDN} {PGUP} {PRTSC} {RIGHT}
+'   {SCROLLLOCK} {TAB} {UP} {F1} {F2} {F3} {F4} {F5} {F6} {F7}
+'   {F8} {F9} {F10} {F11} {F12} {F13} {F14} {F15} {F16}
+' Author: Adam Thomas at Orasi Software Inc.
+' Input:
+'   KeysToSend
+' Return: None
+' Prerequisites: none
+'Alternative consider Mecury device replay See HPE Document KM184330
+'**********************************************************************
 Function SendKeys(KeysToSend)
 	Set WshShell = CreateObject("WScript.Shell")
-	WshShell.SendKeys KeysToSend
+    WshShell.SendKeys KeysToSend
 	Set WshShell = Nothing
 End Function
 
-
-'Author: Adam Thomas
-'Purpose: standard send keys with a configurable delay between key strokes. Useful for AJAX controls
-'Modfied By:
+'**********************************************************************
+' Function Name: SendKeysSlowley
+' Purpose: standard send keys with a configurable delay between key
+'   strokes. Useful for AJAX controls
+' Author: Adam Thomas at Orasi Software Inc.
+' Input:
+'   StringToType
+'   TimeBetweenKeystrokesInMiliseconds
+' Return: None
+' Prerequisites: None
+'**********************************************************************
 Function SendKeysSlowley(StringToType, TimeBetweenKeystrokesInMiliseconds)
 	Set WshShell = CreateObject("WScript.Shell")
 	LenOfStr = Len(StringToType)
@@ -390,10 +541,13 @@ End Function
 
 
 '**********************************************************************
-' Function Name:	 oDateDiff
-' Author:			 Adam Thomas
-' Purpose:
-' Prerequisites:
+' Function Name: oDateDiff
+' Purpose: QUESTION Purpose Function Name: oDateDiff
+' Author: Adam Thomas at Orasi Software Inc.
+' Input:
+'   DateString
+' Return: Date
+' Prerequisites: None
 '**********************************************************************
 Function oDateDiff(DateString)
 	DateString = Replace(DateString, ",", "")
@@ -408,10 +562,14 @@ Function oDateDiff(DateString)
 End Function
 
 '**********************************************************************
-' Function Name:	 UniqueNumber
-' Author:			 Adam Thomas
-' Purpose:
-' Prerequisites:
+' Function Name: UniqueNumber
+' Purpose: returns random number based on the size of number rquested
+' Author: Adam Thomas at Orasi Software Inc.
+' Input:
+'   LengthOfNumber
+' Return:
+'   Unique Number
+' Prerequisites: None
 '**********************************************************************
 Function UniqueNumber(LengthOfNumber)
 	Dim a,b,c,d,e,f
@@ -427,10 +585,19 @@ Function UniqueNumber(LengthOfNumber)
 End Function
 
 '**********************************************************************
-' Function Name:	  	SetFireFoxCertificates
-' Author:				Adam Thomas
-' Purpose:
+' Function Name: SetFireFoxCertificates
+' Purpose: QUESTION Purpose Function Name: SetFireFoxCertificates
+' Author: Adam Thomas at Orasi Software Inc.
+' Input:
+'   CertOverrideALMResourceID
+' Return: None
 ' Prerequisites:
+'   Method GetChildFolders This is part of the FileSystem library.
+'       Retuns list of child folder seperatated with tilde '~'
+'   Method GetUserProfilePath This is part of the FileSystem library.
+'       Retuns list of child folder seperatated with tilde '~'
+'   Method QCGetResource This is part of the ALM library.   Downloads
+'       a resource by resource ID
 '**********************************************************************
 Function SetFireFoxCertificates(CertOverrideALMResourceID)
    	Set FileSys=CreateObject("Scripting.FileSystemObject")
@@ -449,10 +616,16 @@ Function SetFireFoxCertificates(CertOverrideALMResourceID)
 End Function
 
 '**********************************************************************
-' Function Name:	  	OverFlowEdit
-' Author:				Adam Thomas
-' Purpose:
+' Function Name: OverFlowEdit
+' Purpose: QUESTION Purpose Function Name: OverFlowEdit
+' Author: Adam Thomas at Orasi Software Inc.
+' Input:
+'   EditObject
+'   CharacterQty
+'   Message
+' Return: Boolean
 ' Prerequisites:
+'   Object Reporter.ReportEvent
 '**********************************************************************
 Function OverFlowEdit(EditObject,CharacterQty, Message)
 	LongString = ""
@@ -474,14 +647,22 @@ Function OverFlowEdit(EditObject,CharacterQty, Message)
 		Reporter.ReportEvent micFail, Message, BeforeLen & " Characters entered into the edit box, " & AfterLen & " characters persisted."
 		Result = False
 	End If
+    ' BUG Should line below be > OverFlowEdit = Result
 	OverFlow = Result
 End Function
 
 '**********************************************************************
-' Function Name:	  	OverFlowEditReq
-' Author:				Adam Thomas
-' Purpose:
+' Function Name: OverFlowEditReq
+' Purpose: Question  Purpose Function Name: OverFlowEditReq?
+' Author: Adam Thomas at Orasi Software Inc.
+' Input:
+'   EditObject
+'   CharacterQty
+'   ReqID
+'   Message
+' Return: String
 ' Prerequisites:
+'   QUESTION What is ValidateRequirement?  Does not exist
 '**********************************************************************
 Function OverFlowEditReq(EditObject,CharacterQty, ReqID, Message)
 	LongString = ""
@@ -497,32 +678,38 @@ Function OverFlowEditReq(EditObject,CharacterQty, ReqID, Message)
 	EditObject.Set LongString
 	AfterLen = Len(EditObject.GetROProperty("value"))
 	If BeforeLen = AfterLen Then
+
 		ValidateRequirement "Passed", Message, BeforeLen & " Characters entered into the edit box, " & AfterLen & " characters persisted.", ReqID
 		Result = True
 	Else
 		ValidateRequirement "Failed", Message, BeforeLen & " Characters entered into the edit box, " & AfterLen & " characters persisted.", ReqID
 		Result = False
 	End If
+    ' BUG Should line below be > OverFlowEditReq = Result
 	OverFlow = Result
 End Function
 
-
-
 '**********************************************************************
-' Function Name:	  	L
-' Author:				Adam Thomas
-' Purpose:				Adds a new line. To be used with the reporter.
-' Prerequisites:
+' Function Name: L
+' Purpose: Adds a new line. To be used with the reporter.
+' Author: Adam Thomas at Orasi Software Inc.
+' Input:
+' Return: String for line feed
+' Prerequisites: none
 '**********************************************************************
 Function L()
 	 L = chr(13) & chr(10)
 End Function
 
 '**********************************************************************
-' Function Name:	  	ML
-' Author:				Adam Thomas
-' Purpose:				Adds multiple new lines. To be used with the reporter.
-' Prerequisites:
+' Function Name: ML
+' Purpose: Adds multiple new lines. To be used with the reporter.
+' Author: Adam Thomas at Orasi Software Inc.
+' Input:
+'   NumberOfLines
+' Return: String of New linges
+' Prerequisites: none
+' REVIEW Should chr(13) & chr(10) be replaced with l()?
 '**********************************************************************
 Function ML(NumberOfLines)
    For n = 1 to NumberOfLines
@@ -532,10 +719,13 @@ Function ML(NumberOfLines)
 End Function
 
 '**********************************************************************
-' Function Name:	  	RegExCleaner
-' Author:				Adam Thomas
-' Purpose:				Clears a string of any regular expression characters
-' Prerequisites:
+' Function Name: RegExCleaner
+' Purpose: Clears a string of any regular expression characters
+' Author: Adam Thomas at Orasi Software Inc.
+' Input:
+'   StringToClean
+' Return: string
+' Prerequisites: None
 '**********************************************************************
 Function RegExCleaner(StringToClean)
 	aSpecialChars = Split("[ \ ^ $ | ? + ( ) { }")
@@ -546,10 +736,14 @@ Function RegExCleaner(StringToClean)
 End Function
 
 '**********************************************************************
-' Function Name:	 UpdateTestPlanField
-' Author:			 Vicky Chen
-' Purpose:
+' Function Name: UpdateTestPlanField
+' Purpose: Update test plan field with input value
+' Author: Vicky Chen at QUESTION Where did Vicky Chen come from?
+' Input:
+'   StrStatus
+' Return: None
 ' Prerequisites:
+'   Object Reporter.ReportEvent
 '**********************************************************************
 Sub UpdateStatus(StrStatus)
 	On Error Resume Next
@@ -560,10 +754,15 @@ Sub UpdateStatus(StrStatus)
 End Sub
 
 '**********************************************************************
-' Function Name:	  	FindUIColumn
-' Author:				Adam Thomas
-' Purpose:				Finds column number with a given column name
-' Prerequisites:
+' Function Name: FindUIColumn
+' Purpose: Finds column number with a given column name
+' Author: Adam Thomas at Orasi Software Inc.
+' Input:
+'   TableObject
+'   ColumnName
+'   HeaderRow
+' Return: number of the column
+' Prerequisites: NumberOfLines
 '**********************************************************************
 Function FindUIColumn(TableObject, ColumnName, HeaderRow)
 	FoundFlag = False
@@ -586,10 +785,14 @@ Function FindUIColumn(TableObject, ColumnName, HeaderRow)
 End Function
 
 '**********************************************************************
-' Function Name:	  	TableSignature
-' Author:				Adam Thomas
-' Purpose:				Returns a string representing the state of a table.
-' Prerequisites:
+' Function Name: TableSignature
+' Purpose: Returns a string representing the state of a table.
+' Author: Adam Thomas at Orasi Software Inc.
+' Input:
+'   TableObject
+'   ColumnRow
+' Return: String
+' Prerequisites: None
 '**********************************************************************
 Function TableSignature(TableObject, ColumnRow)
 	On Error Resume Next
@@ -606,10 +809,12 @@ End Function
 
 
 '**********************************************************************
-' Function Name:	  	TimeStamp
-' Author:				Adam Thomas
-' Purpose:				Converts date time string to an acceptable format for file systems
-' Prerequisites:
+' Function Name: TimeStamp
+' Purpose: Converts date time string to an acceptable format for file systems
+' Author: Adam Thomas at Orasi Software Inc.
+' Input: None
+' Return: String Time
+' Prerequisites: None
 '**********************************************************************
 Function TimeStamp()
 	MyTime = Now()
@@ -619,10 +824,18 @@ Function TimeStamp()
 End Function
 
 '**********************************************************************
-' Function Name:	  	CreateReportWithScreenShot
-' Author:						Adam Thomas
-' Purpose:					creates QTP/UFT reporter message with screenshot of system
-' Prerequisites:		Function CreateTempFolder, FunctionDeleteFileByPath
+' Function Name: CreateReportWithScreenShot
+' Purpose: creates QTP/UFT reporter message with screenshot of system
+' Author: Adam Thomas at Orasi Software Inc.
+' Input:
+'   PassFailDoneOrWarning
+'   StepName
+'   Details
+' Return: none
+' Prerequisites:
+'   Object Reporter.ReportEvent
+'   Function CreateTempFolder This is in the FileSystem Library
+'   Method DeleteFileByPath Delete a File from the path provided
 '**********************************************************************
 Function CreateReportWithScreenShot(PassFailDoneOrWarning,StepName,Details)
 	TF = CreateTempFolder("C:\Temp\UFT\")
@@ -641,11 +854,14 @@ Function CreateReportWithScreenShot(PassFailDoneOrWarning,StepName,Details)
 	DeleteFileByPath(TF)
 End Function
 
- '**********************************************************************
-' Function Name:	  	GetUserEV
-' Author:				Adam Thomas
-' Purpose:
-' Prerequisites:
+'**********************************************************************
+' Function Name: GetUserEV
+' Purpose: Returns Environment Varaible value
+' Author: Adam Thomas at Orasi Software Inc.
+' Input:
+'   EnvironmentalVariableName
+' Return: string
+' Prerequisites: none
 '**********************************************************************
 Function GetUserEV(EnvironmentalVariableName)
 	Set objWSH =  CreateObject("WScript.Shell")
@@ -655,12 +871,15 @@ Function GetUserEV(EnvironmentalVariableName)
 	Set objWSH =  nothing
 End Function
 
-
- '**********************************************************************
-' Function Name:	  	SetUserEV
-' Author:				Adam Thomas
-' Purpose:
-' Prerequisites:
+'**********************************************************************
+' Function Name: SetUserEV
+' Purpose: Set Environment Varaible
+' Author: Adam Thomas at Orasi Software Inc.
+' Input:
+'   EnvironmentalVariableName
+'   Value
+' Return:  none
+' Prerequisites: none
 '**********************************************************************
 Function SetUserEV(EnvironmentalVariableName, Value)
 	Set objWSH =  CreateObject("WScript.Shell")
@@ -670,11 +889,14 @@ Function SetUserEV(EnvironmentalVariableName, Value)
 	Set objWSH =  nothing
 End Function
 
- '**********************************************************************
-' Function Name:	  	ReturnTextFileText
-' Author:				Adam Thomas
-' Purpose:
-' Prerequisites:
+'**********************************************************************
+' Function Name: ReturnTextFileText
+' Purpose: Return contens of file with provide path
+' Author: Adam Thomas at Orasi Software Inc.
+' Input:
+'   TxtFilePath
+' Return: String of contents of text file
+' Prerequisites: None
 '**********************************************************************
 Function ReturnTextFileText(TxtFilePath)
 	Set objFileToRead = CreateObject("Scripting.FileSystemObject").OpenTextFile(TxtFilePath,1)
@@ -683,9 +905,15 @@ Function ReturnTextFileText(TxtFilePath)
 	Set objFileToRead = Nothing
 End Function
 
-'Author: Adam Thomas
-'Purpose: Creates a random string at a given length. Uses random methods. For time based methods, use function RandomString
-'Modfied By:
+'**********************************************************************
+' Function Name: RndString
+' Purpose: Creates a random string at a given length. Uses random methods. For time based methods, use function RandomString
+' Author: Adam Thomas at Orasi Software Inc.
+' Input:
+'   LengthOfStrimg
+' Return: String
+' Prerequisites: None
+'**********************************************************************
 Function RndString(LengthOfStrimg)
   	LongString = ""
 	For x = 1 to LengthOfStrimg
@@ -699,18 +927,26 @@ Function RndString(LengthOfStrimg)
 	RndString = LongString
 End Function
 
-
-'Author: Unknown
-'Purpose: encrypts a string
-'Modfied By:
-'Encryption Example
+'**********************************************************************
+' Function Name: encrypt
+' Purpose: encrypts a string
+' Encryption Example
 '	temp = "MyPassword"
-' 	key = "myrandomkey"
+'	key = "myrandomkey"
 '
 '	Before = Encrypt(temp,key)
 '	MSGBOX Before
 ' 	After = Decrypt(Before,key)
 ' 	MSGBOX After
+
+' Author: Unknown
+' Input:
+'   Str
+'   key
+' Return: stringLength
+' Prerequisites:
+'   Method RandomString This is is in the General Library
+'**********************************************************************
 Function encrypt(Str, key)
   'Dim lenKey, KeyPos, LenStr, x, Newstr
   origionalStringLength = Len(str)
@@ -731,9 +967,16 @@ Function encrypt(Str, key)
   encrypt = Newstr
  End Function
 
-'Author: Unknown
-'Purpose:
-'Modfied By:
+ '**********************************************************************
+ ' Function Name: Decrypt
+ ' Purpose: decrypts string that was made with encrypt method
+ ' Author: Unknown
+ ' Input:
+ '   Str
+ '   key
+ ' Return: String
+ ' Prerequisites: none
+ '**********************************************************************
 Function Decrypt(str,key)
   Dim lenKey, KeyPos, LenStr, x, Newstr
 
@@ -752,9 +995,18 @@ Function Decrypt(str,key)
    Decrypt = Split(Newstr, "~")(1)
  End Function
 
- 'Author: Adam Thomas
-'Purpose:
-'Modfied By:
+'**********************************************************************
+' Function Name: GenericWaitForLoad
+' Purpose: Wait for an object to become visible
+' Author: Adam Thomas at Orasi Software Inc.
+' Input:
+'   TimeoutInSeconds
+'   LoadingIconObject
+' Return: none
+' Prerequisites:
+'   Object Reporter.ReportEvent
+' NOTE Recommend capture time before setting new vale so it can be set back.
+'**********************************************************************
 Function GenericWaitForLoad(TimeoutInSeconds, LoadingIconObject)
 	ReportLoaded = False
 	Setting("DefaultLoadTime ")= "1000"
@@ -783,9 +1035,15 @@ Function GenericWaitForLoad(TimeoutInSeconds, LoadingIconObject)
 	End If
 End Function
 
-'Author: Adam Thomas
-'Purpose:
-'Modfied By:
+'**********************************************************************
+' Function Name: CheckZero
+' Purpose: QUESTION Purpose Function Name: CheckZero
+' Author: Adam Thomas at Orasi Software Inc.
+' Input:
+'   StringInQuestion
+' Return: Boolean
+' Prerequisites: None
+'**********************************************************************
 Function CheckZero(StringInQuestion)
 	AllClear = True
 	StrLen = Len(StringInQuestion)
@@ -802,10 +1060,17 @@ Function CheckZero(StringInQuestion)
 	CheckZero = AllClear
 End Function
 
-
-'Author: Adam Thomas
-'Purpose:
-'Modfied By:
+'**********************************************************************
+' Function Name: Percentage
+' Purpose: Return the Percentage of  part divided by Total with decimal
+'   point and percent symbol
+' Author: Adam Thomas at Orasi Software Inc.
+' Input:
+'   Part
+'   Total
+' Return: number
+' Prerequisites: None
+'**********************************************************************
 Function Percentage(Part, Total)
 	If CInt(Total) = 0 Then
 		Perc = "Cannot divide by zero."
@@ -847,9 +1112,15 @@ Function Percentage(Part, Total)
 	Percentage = Perc
 End Function
 
-'Author: Adam Thomas
-'Purpose:
-'Modfied By:
+'**********************************************************************
+' Function Name: CleanNumber
+' Purpose: Removes Dollar sign and comma from string.
+' Author: Adam Thomas at Orasi Software Inc.
+' Input:
+'   NumbertoClean
+' Return: number
+' Prerequisites: None
+'**********************************************************************
 Function CleanNumber(NumbertoClean)
 	NumbertoClean = Replace(NumbertoClean, "$", "")
 	For x = 1 To 10 Step 1
@@ -858,9 +1129,15 @@ Function CleanNumber(NumbertoClean)
 	CleanNumber = NumbertoClean
 End Function
 
-'Author: Adam Thomas
-'Purpose:
-'Modfied By:
+'**********************************************************************
+' Function Name: CountFileLines
+' Purpose: Return the number of lines in file of given path.
+' Author: Adam Thomas at Orasi Software Inc.
+' Input:
+'   FilePath
+' Return: Number
+' Prerequisites:
+'**********************************************************************
 Function CountFileLines(FilePath)
 	Dim objFSO, txsInput, strTemp, arrLines
 	Const ForReading = 1
@@ -880,9 +1157,17 @@ Function CountFileLines(FilePath)
 	Set objFSO = Nothing
 End Function
 
-'Author: Perry Thomas
-'Purpose:
-'Modfied By:
+'**********************************************************************
+' Function Name: LoadBar
+' Purpose: QUESTION Purpose Function Name: LoadBar
+' Author: Perry Thomas  QUESTION where did Perry Thomas come from?
+' Input:
+'   OnOffSwitch
+'   BarTitle
+'   MaxSteps
+' Return: none
+' Prerequisites: None
+'**********************************************************************
 Public Function LoadBar(OnOffSwitch,BarTitle,MaxSteps)
 	'Select on or off switch
 	Select Case Ucase(OnOffSwitch)
@@ -945,9 +1230,16 @@ Public Function LoadBar(OnOffSwitch,BarTitle,MaxSteps)
 	End Select
 End Function
 
-'Author: Perry Thomas
-'Purpose:
-'Modfied By:
+'**********************************************************************
+' Function Name: LoadStep
+' Purpose: QUESTION Purpose Function Name: LoadStep?
+' Author: Perry Thomas QUESTION Where did Perry Thomas come from?
+' Input: none
+' Return: none
+' Prerequisites:
+'   Environment MyForm
+'   Environment LoadBar
+'**********************************************************************
 Public Function LoadStep
 	Set MyForm = Environment("MyForm")
 	Set MyProgressBar = Environment("LoadBar")
@@ -960,9 +1252,16 @@ Public Function LoadStep
 	End If
 End Function
 
-'Author: Adam Thomas
-'Purpose:
-'Modfied By:
+'**********************************************************************
+' Function Name: SelectFromDropDown
+' Purpose: Select Item form drop down list
+' Author: Adam Thomas at Orasi Software Inc.
+' Input:
+'   DropDownObject
+'   TextToSelect
+' Return: none
+' Prerequisites: none
+'**********************************************************************
 Function SelectFromDropDown(DropDownObject, TextToSelect)
 	Set DDO = DropDownObject
 	aList = Split(DDO.GetROProperty("all items"), ";")
@@ -980,25 +1279,44 @@ Function SelectFromDropDown(DropDownObject, TextToSelect)
 	Next
 End Function
 
-'Author: Adam Thomas
-'Purpose:
-'Modfied By:
+'**********************************************************************
+' Function Name: ReportingOff
+' Purpose: set Reporting of results to errors only events And suppress On errors
+' Author: Adam Thomas at Orasi Software Inc.
+' Input: None
+' Return: none
+' Prerequisites:
+'   Object Reporter '
+'**********************************************************************
 Function ReportingOff()
 	On Error Resume Next
 	Reporter.Filter = 3
 End Function
 
-'Author: Adam Thomas
-'Purpose:
-'Modfied By:
+'**********************************************************************
+' Function Name: ReportingOn
+' Purpose: set Reporting of results All reported events are displayed in the Run Results
+' Author: Adam Thomas at Orasi Software Inc.
+' Input: None
+' Return: None
+' Prerequisites: none
+'**********************************************************************
 Function ReportingOn()
 	On Error GoTo 0
 	Reporter.Filter = 0
 End Function
 
-'Author: Adam Thomas
-'Purpose:
-'Modfied By:
+'**********************************************************************
+' Function Name: DefaultTimeout
+' Purpose: Sets Maximum time in milliseconds to wait before it is
+'   determined that an object cannot be found.  Based on Environment Value
+'   TO'
+' Author: Adam Thomas at Orasi Software Inc.
+' Input: None
+' Return: None
+' Prerequisites: None
+' REVIEW  Should the existing timeout be stored to reset later usage?
+'**********************************************************************
 Function DefaultTimeout()
 	If Environment.Value("TO") <>"" Then
 		Setting("DefaultTimeOut")= Environment.Value("TO")
@@ -1007,9 +1325,15 @@ Function DefaultTimeout()
 	End If
 End Function
 
-'Author: Adam Thomas
-'Purpose:
-'Modfied By:
+'**********************************************************************
+' Function Name: ShortTimeout
+' Purpose: Set Maximum time to 500 milliseconds to wait before it
+'   is determined that an object cannot be found.
+' Author: Adam Thomas at Orasi Software Inc.
+' Input: None
+' Return: Number
+' Prerequisites: none
+'**********************************************************************
 Function ShortTimeout()
 	Def = Setting("DefaultTimeOut")
 	Setting("DefaultTimeOut")= "500"
@@ -1017,9 +1341,16 @@ Function ShortTimeout()
 	ShortTimeout = Def
 End Function
 
-'Author: Adam Thomas
-'Purpose:
-'Modfied By:
+'**********************************************************************
+' Function Name: IsInArray
+' Purpose: Determines if string is in Arrary
+' Author: Adam Thomas at Orasi Software Inc.
+' Input:
+'   ArrayName
+'   SearchString
+' Return: Boolean
+' Prerequisites: None
+'**********************************************************************
 Function IsInArray(ArrayName,SearchString)
 FoundString = False
 	For Each Node In ArrayName
@@ -1030,9 +1361,16 @@ FoundString = False
 	IsInArray = FoundString
 End Function
 
-'Author: Adam Thomas
-'Purpose:
-'Modfied By:
+'**********************************************************************
+' Function Name: DeleteFromArray
+' Purpose: Removes item from array and returns new array
+' Author: Adam Thomas at Orasi Software Inc.
+' Input:
+'   ArrayName
+'   TextToDelete
+' Return: Array with item removed
+' Prerequisites: none
+'**********************************************************************
 Function DeleteFromArray(ArrayName, TextToDelete)
 	AllText = ""
 	For Each Node In ArrayName
@@ -1044,22 +1382,45 @@ Function DeleteFromArray(ArrayName, TextToDelete)
 	DeleteFromArray = Split(AllText, "|||")
 End Function
 
-'Author: Adam Thomas
-'Purpose:
-'Modfied By:
+'**********************************************************************
+' Function Name: ET
+' Purpose: QUESTION Purpose Function Name: ET
+' Author: Adam Thomas at Orasi Software Inc.
+' Input: ET
+' Return: None
+' Prerequisites:
+'   Method CleanUp This is in General Library
+'   Method ExitTestIteration This is a UFT reserved word.
+'**********************************************************************
 Function ET
 	CleanUp
 	ExitTestIteration
 End Function
 
-'Author: Adam Thomas
-'Purpose:
-'Modfied By:
+'**********************************************************************
+' Function Name: CleanRecovery
+' Purpose: QUESTION Purpose  Function Name: CleanRecovery it is blank function
+' Author: Adam Thomas at Orasi Software Inc.
+' Input:
+'   Object
+' Return: none
+' Prerequisites: none
+'**********************************************************************
 Function CleanRecovery(Object)
 
 End Function
 
-'Author: Adam Thomas
+'**********************************************************************
+' Function Name: GetClipBoardText
+' Purpose: Returns contents of the currren clipboard
+'QUESTION Function GetClipBoardText should it use Mercury clipboard instead?
+' Author: Adam Thomas at Orasi Software Inc.
+' Input: None
+' Return: String
+' Prerequisites:
+'   Method GetData From the General Library.  Gets data from the data table
+'       and converts any key word to the appropriate string
+'**********************************************************************
 'Purpose: returns text from clipboard. Can negatively effect ALM reporting on some versions.
 'Modfied By:
 Function GetClipBoardText()
@@ -1069,7 +1430,7 @@ Function GetClipBoardText()
 	objHTML.close
 	Set objHTML = Nothing
 
-
+'NOTE remove lines below'
 	'Set objIE = CreateObject("InternetExplorer.Application")
     ' objIE.Navigate("about:blank")
     ' GetClipBoardText = objIE.document.parentwindow.clipboardData.GetData("text")
@@ -1077,49 +1438,88 @@ Function GetClipBoardText()
 End Function
 
 
-' Author: Brian Buckhana
+'**********************************************************************
+' Function Name: GetWebEditValue
 ' Purpose: Returns a Web Edit's current value.
-' Modified By:
+' Author: Brian Buckhana at Orasi Software Inc.
+' Input:
+'   WebEditObject
+' Return: String
+' Prerequisites: None
+'**********************************************************************
 Function GetWebEditValue(WebEditObject)
 	Set WE = WebEditObject
 	GetWebEditValue = WE.GetROProperty("value")
 End Function
 
-' Author: Brian Buckhana
+'**********************************************************************
+' Function Name: GetWebListValue
 ' Purpose: Returns a Web List's current value.
-' Modified By:
+' Author: Brian Buckhana
+' Input:
+'   WebListObject
+' Return: String
+' Prerequisites: None
+'**********************************************************************
 Function GetWebListValue(WebListObject)
 	Set WL = WebListObject
 	GetWebListValue = WL.GetROProperty("value")
 End Function
 
-' Author: Brian Buckhana
+'**********************************************************************
+' Function Name: GetCheckboxValue
 ' Purpose: Returns a Web Checkbox's current value.
-' Modified By:
+' Author: Brian Buckhana at Orasi Software Inc.
+' Input:
+'   CheckboxObject
+' Return: Boolean
+' Prerequisites: none
+'**********************************************************************
 Function GetCheckboxValue(CheckboxObject)
 	Set CB = CheckboxObject
 	GetCheckboxValue = CB.GetROProperty("checked")
 End Function
 
-' Author: Brian Buckhana
+'**********************************************************************
+' Function Name: GetWebElementValue
 ' Purpose: Returns a Web Element's current value.
-' Modified By:
+' Author: Brian Buckhana at Orasi Software Inc.
+' Input:
+'   WebElementObject
+' Return: string
+' Prerequisites: None
+'**********************************************************************
 Function GetWebElementValue(WebElementObject)
 	Set WE = WebElementObject
 	GetWebElementValue = WE.GetROProperty("innertext")
 End Function
 
-' Author: Brian Buckhana
+'**********************************************************************
+' Function Name: GetWebRadioGroupValue
 ' Purpose: Returns a Web Radio Group's current value.
-' Modified By:
+' Author: Brian Buckhana at Orasi Software Inc.
+' Input:
+'   WebRadioGroup
+' Return: String
+' Prerequisites: none
+'**********************************************************************
 Function GetWebRadioGroupValue(WebRadioGroup)
 	Set WRG = WebRadioGroupObject
 	GetWebRadioGroupValue = WE.GetROProperty("value")
 End Function
 
-'Author: Adam Thomas
-'Purpose: Sets a checkbox to checked or not checked based on parameter data. Blank parameter is not checked, and any 'select' key work will select it.
-'Modfied By: Brian Buckhana
+'**********************************************************************
+' Function Name: SetCheckbox
+' Purpose: Sets a checkbox to checked or not checked based on parameter
+'   data. Blank parameter is not checked, and any 'select' key work
+'   will select it.
+' Author: Brian Buckhana at Orasi Software Inc.
+' Input:
+'   CheckBoxObject
+'   Parameter
+' Return: none
+' Prerequisites: None
+'**********************************************************************
 Function SetCheckbox(CheckBoxObject, Parameter)
 	Set CB = CheckBoxObject
 
@@ -1133,9 +1533,16 @@ Function SetCheckbox(CheckBoxObject, Parameter)
 	End If
 End Function
 
-'Author: Brian Buckhana
-'Purpose: Sets a web radio group based on parameter data.
-'Modfied By:
+'**********************************************************************
+' Function Name: SetWebRadioGroup
+' Purpose: Sets a web radio group based on parameter data.
+' Author: Brian Buckhana at Orasi Software Inc.
+' Input:
+'   WebRadioGroupObject
+'   Parameter
+' Return: none
+' Prerequisites: none
+'**********************************************************************
 Function SetWebRadioGroup(WebRadioGroupObject, Parameter)
 	Set WRG = WebRadioGroupObject
 
@@ -1149,9 +1556,14 @@ Function SetWebRadioGroup(WebRadioGroupObject, Parameter)
 	End If
 End Function
 
-'Author: Adam Thomas
-'Purpose: Returns a truely unique string of all caps characters
-'Modfied By:
+'**********************************************************************
+' Function Name: RandomString
+' Purpose: Returns a truely unique string of all caps characters
+' Author: Adam Thomas at Orasi Software Inc.
+' Input: None
+' Return: string
+' Prerequisites: none
+'**********************************************************************
 Function RandomString()
 
 	S = Second(Now)
@@ -1174,9 +1586,15 @@ Function RandomString()
 
 End Function
 
-'Author: Adam Thomas
-'Purpose: Returns a unique social security number. Does not comply with all SS rules
-'Modfied By:
+'**********************************************************************
+' Function Name: RandomSS
+' Purpose:  Returns a unique social security number. Does not comply
+'   with all SS rulesTODO Purpose
+' Author: Adam Thomas at Orasi Software Inc.
+' Input: None
+' Return: String
+' Prerequisites: None
+'**********************************************************************
 Function RandomSS()
 	S = Second(Now)
 	MN = Minute(Now)
@@ -1191,8 +1609,18 @@ Function RandomSS()
 End Function
 
 
-'Author: Adam Thomas
-'Purpose: Sets a webedit to a value if parameter has data. Blank parameter will skip the web edit all together
+'**********************************************************************
+' Function Name: SetWebEdit
+' Purpose: Sets a webedit to a value if parameter has data. Blank
+'   parameter will skip the web edit all together
+' Author: Adam Thomas at Orasi Software Inc.
+' Input:
+'   WebEditObject
+'   Parameter
+' Return: none
+' Prerequisites: none
+' QUESTION What is method RSS()?
+'**********************************************************************
 'Modfied By: Brian Buckhana
 Function SetWebEdit(WebEditObject, Parameter)
 	Set oWE = WebEditObject
@@ -1217,9 +1645,20 @@ Function SetWebEdit(WebEditObject, Parameter)
 	End If
 End Function
 
-'Author: Adam Thomas
-'Purpose:
-'Modfied By:
+'**********************************************************************
+' Function Name: SetWebElement
+' Purpose: Sets a webelement to a value if parameter has data. Blank
+'   parameter will skip the web edit all together
+' Author: Adam Thomas at Orasi Software Inc.
+' Input:
+'   WebElementObject
+'   Parameter
+' Return: None
+' Prerequisites:
+'   Method SendKeys This is in the General Library. Sends key strokes to any
+'       active window or object
+' QUESTION What is method RSS()?
+'**********************************************************************
 Function SetWebElement(WebElementObject, Parameter)
 	Set oWE = WebElementObject
 
@@ -1241,10 +1680,18 @@ Function SetWebElement(WebElementObject, Parameter)
 	End If
 End Function
 
-
-'Author: Adam Thomas
-'Purpose: Sets a weblist to a value if parameter has data. Blank parameter will skip the web list all together
-'Modfied By:
+'**********************************************************************
+' Function Name: SetWebList
+' Purpose: Sets a weblist to a value if parameter has data. Blank
+'   parameter will skip the web list all together
+' Author: Adam Thomas at Orasi Software Inc.
+' Input:
+'   WebListObject
+'   Parameter
+' Return: none
+' Prerequisites:
+'   Object Reporter.ReportEvent
+'**********************************************************************
 Function SetWebList(WebListObject, Parameter)
 	Set oWL = WebListObject
 
@@ -1262,9 +1709,19 @@ Function SetWebList(WebListObject, Parameter)
 	End If
 End Function
 
-' Author: Brian Buckhana
-' Purpose: Verifies if an object is enabled/disabled and reports back this status.
-' Modified By:
+'**********************************************************************
+' Function Name: VerifyObjectEnabled
+' Purpose: Verifies if an object is enabled/disabled and reports
+'   back this status.
+' Author: Brian Buckhana at Orasi Software Inc.
+' Input:
+'   WebObject
+'   ObjectType
+'   ExpectedEnablement
+' Return: String
+' Prerequisites:
+'   Object Reporter.ReportEvent
+'**********************************************************************
 Function VerifyObjectEnabled(WebObject, ObjectType, ExpectedEnablement)
 	Set object = WebObject
 '	enabled = object.GetROProperty("disabled")
@@ -1291,9 +1748,16 @@ Function VerifyObjectEnabled(WebObject, ObjectType, ExpectedEnablement)
 
 End Function
 
-'Author: Adam Thomas
-'Purpose:
-'Modfied By:
+'**********************************************************************
+' Function Name: ParameterValue
+' Purpose: Converts input string into array of string split on # and
+'   returns first item
+' Author: Adam Thomas at Orasi Software Inc.
+' Input:
+'   ParameterText
+' Return: Returns string in input string after split
+' Prerequisites: Done
+'**********************************************************************
 Function ParameterValue(ParameterText)
 	If ParameterText <> "" Then
 		ParameterValue = Split(ParameterText, "#")(0)
@@ -1302,9 +1766,16 @@ Function ParameterValue(ParameterText)
 	End If
 End Function
 
-'Author: Adam Thomas
-'Purpose:
-'Modfied By:
+'**********************************************************************
+' Function Name: ParameterDescription
+' Purpose: QUESTION Purpose Function Name: ParameterDescription?
+' Author: Adam Thomas at Orasi Software Inc.
+' Input:
+'   ParameterText
+'   DefaultDescription
+' Return: Returns string of input string which is the second item.
+' Prerequisites: none
+'**********************************************************************
 Function ParameterDescription(ParameterText, DefaultDescription)
 	If ParameterText <> "" Then
 		If UBound(Split(ParameterText, "#")) = 1 Then
@@ -1318,15 +1789,25 @@ Function ParameterDescription(ParameterText, DefaultDescription)
 
 End Function
 
-
-'Author: Adley Haywood
-'Purpose: Verifies a checkbox to whether it is checked or not checked based on parameter data.
-'Modfied By: Brian Buckhana
+'**********************************************************************
+' Function Name: VerifyCheckbox
+' Purpose: Verifies a checkbox to whether it is checked or not
+'   checked based on parameter data.
+' Author: Adley Haywood at Orasi Software Inc.
+' Modfied By: Brian Buckhana at Orasi Software Inc.
+' Input:
+'   CheckBoxObject
+'   Parameters
+' Return: None
+' Prerequisites:
+'   Object Reporter.ReportEvent
+'   Method VerifyObjectExists This fucntion is in General Lbrary.
+'   Method ParameterValue This fucntion is in General Lbrary.
+'**********************************************************************
 Function VerifyCheckbox(CheckBoxObject, Parameter)
 	Dim stringLength
 	Dim Verify
 	Set CB = CheckBoxObject
-
 
 '	HID = CB.GetROProperty("html id")
 
@@ -1374,9 +1855,20 @@ Function VerifyCheckbox(CheckBoxObject, Parameter)
 	End If
 End Function
 
-'Author: Adam Thomas
-'Purpose:
-'Modfied By:
+'**********************************************************************
+' Function Name: VerifyCheckboxReverse
+' Purpose: QUESTION Purpose Function Name: VerifyCheckboxReverse?
+' Author: Adam Thomas at Orasi Software Inc.
+' Input:
+'   CheckBoxObject
+'   Parameter
+' Return: none
+' Prerequisites:
+'   Method ParameterDescription This is in the General library.
+'   Method ParameterValue This is in the General library.
+'   Method VerifyObjectExists This is in the General library.
+'   Object Reporter.ReportEvent
+'**********************************************************************
 Function VerifyCheckboxReverse(CheckBoxObject, Parameter)
 	Dim stringLength
 	Dim Verify
@@ -1429,9 +1921,21 @@ Function VerifyCheckboxReverse(CheckBoxObject, Parameter)
 	End If
 End Function
 
-'Author: Adley Haywood
-'Purpose: Verifies a webedit has the value of parameter passed in.
-'Modfied By: Brian Buckhana
+'**********************************************************************
+' Function Name: VerifyWebEdit
+' Purpose: Verifies a webedit has the value of parameter passed in.
+' Author: Adley Haywood at Orasi Software Inc.
+' Modfied By: Brian Buckhana at Orasi Software Inc.
+' Input:
+'   WebEditObject
+'   Parameter
+' Return: None
+' Prerequisites:
+'   Method ParameterDescription This is in the General library.
+'   Method ParameterValue This is in the General library.
+'   Method VerifyObjectExists This is in the General library.
+'   Object Reporter.ReportEvent+
+'**********************************************************************
 Function VerifyWebEdit(WebEditObject, Parameter)
 	Dim stringLength
 	Dim Verify
@@ -1477,9 +1981,19 @@ Function VerifyWebEdit(WebEditObject, Parameter)
 	End If
 End Function
 
-'Author: Adam Thomas
-'Purpose:
-'Modfied By:
+'**********************************************************************
+' Function Name: VerifyVarText
+' Purpose: QUESTION Purpose Function Name: VerifyVarText
+' Author: Adam Thomas at Orasi Software Inc.
+' Input:
+'   TextVariable
+'   Parameter
+' Return: String TextVariable
+' Prerequisites:
+'   Object Reporter.ReportEvent
+'   Method ParameterDescription This is in the General library.
+'   Method ParameterValue This is in the General library.
+'**********************************************************************
 Function VerifyVarText(TextVariable, Parameter)
 	Dim stringLength
 	Dim Verify
@@ -1514,14 +2028,25 @@ Function VerifyVarText(TextVariable, Parameter)
 
 End Function
 
-'Author: Adley Haywood
-'Purpose: Verifies a weblist has the value of parameter passed in.
-'Modfied By: Brian Buckhana
+'**********************************************************************
+' Function Name: VerifyWebList
+' Purpose: Verifies a weblist has the value of parameter passed in.
+' Author: Adley Haywood at Orasi Software Inc.
+' Modfied By: Brian Buckhana at Orasi Software Inc.
+' Input:
+'   WebListObject
+'   Parameter
+' Return: none
+' Prerequisites:
+'   Method ParameterDescription This is in the General library.
+'   Method ParameterValue This is in the General library.
+'   Method VerifyObjectExists This is in the General library.
+'   Object Reporter.ReportEvent+
+'**********************************************************************
 Function VerifyWebList(WebListObject, Parameter)
 	Dim stringLength
 	Dim Verify
 	Set oWL = WebListObject
-
 
 	' Made it an if-else in case more functionality is to be added later.
 	If VerifyObjectExists(WebListObject, 5, ParameterDescription(Parameter,"Web List")) Then
@@ -1565,9 +2090,18 @@ Function VerifyWebList(WebListObject, Parameter)
 	End If
 End Function
 
-'Author: Brian Buckhana
-'Purpose: Verifies an image exists.
-'Modfied By:
+'**********************************************************************
+' Function Name: VerifyWebImage
+' Purpose: Verifies an image exists.
+' Author: Brian Buckhana at Orasi Software Inc.
+' Input:
+'   WebImageObject
+'   WebImageName
+' Return: none
+' Prerequisites:
+'   Method VerifyObjectExists This is in the General library.
+' BUG  Function VerifyWebImage not complete'
+'**********************************************************************
 Function VerifyWebImage(WebImageObject, WebImageName)
 
 	' Made it an if-else in case more functionality is to be added later.
@@ -1579,15 +2113,25 @@ Function VerifyWebImage(WebImageObject, WebImageName)
 
 End Function
 
-'Author: Brian Buckhana
-'Purpose: Verifies a weblink has the value of parameter passed in.
-'Modfied By:
+'**********************************************************************
+' Function Name: VerifyWebLink
+' Purpose: Verifies a weblink has the value of parameter passed in.
+' Author: Brian Buckhana at Orasi Software Inc.
+' Input:
+'   WebLinkObject
+'   Parameter
+' Return: none
+' Prerequisites:
+'   Method ParameterDescription This is in the General library.
+'   Method ParameterValue This is in the General library.
+'   Method VerifyObjectExists This is in the General library.
+'   Object Reporter.ReportEvent+
+'**********************************************************************
 Function VerifyWebLink(WebLinkObject, Parameter)
 	Dim exists
 	Dim Verify
 	Set oWL = WebLinkObject
 '	HID = oWL.GetROProperty("html id")
-
 
 	' Made it an if-else in case more functionality is to be added later.
 	If VerifyObjectExists(WebLinkObject, 5, ParameterDescription(Parameter,"Web Link")) Then
@@ -1610,9 +2154,23 @@ Function VerifyWebLink(WebLinkObject, Parameter)
 	End If
 End Function
 
-'Author: Brian Buckhana
-'Purpose: Verifies an object exists and provides a report for it.  Saves time from writing multiple "If, Else" statements.
-'Modfied By:
+'**********************************************************************
+' Function Name: VerifyObjectExists
+' Purpose: Verifies an object exists and provides a report for it.
+'   Saves time from writing multiple "If, Else" statements.
+' Author: Brian Buckhana at Orasi Software Inc.
+' Input:
+'   WebObject
+'   Timeout
+'   ObjectName
+' Return: Boolean
+' Prerequisites:
+'   Method ReportingOff This is located in General library.
+'   Method ReportingOn This is located in General library.
+'   Method ShortTimeout This is located in General library.
+'   Method DefaultTimeout This is located in General library.
+'   Object Reporter.ReportEvent
+'**********************************************************************
 Function VerifyObjectExists(WebObject, Timeout, ObjectName)
 	ShortTimeOut
 	Set WO = WebObject
@@ -1631,14 +2189,25 @@ Function VerifyObjectExists(WebObject, Timeout, ObjectName)
 	DefaultTimeOut
 End Function
 
-'Author: Adley Haywood
-'Purpose: Verifies a weblist has the value of parameter passed in.
-'Modfied By: Brian Buckhana
+'**********************************************************************
+' Function Name: VerifyWebElement
+' Purpose: Verifies a weblist has the value of parameter passed in.
+' Author: Adley Haywood at Orasi Software Inc.
+' Modfied By: Brian Buckhana at Orasi Software Inc.
+' Input:
+'   WebElementObject
+'   Parameter
+' Return: none
+' Prerequisites:
+'   Object Reporter.ReportEvent
+'   Method ParameterDescription This is in the General library.
+'   Method ParameterValue This is in the General library.
+'   Method VerifyObjectExists This is in the General library.
+'**********************************************************************
 Function VerifyWebElement(WebElementObject, Parameter)
 	Dim stringLength
 	Dim Verify
 	Set oWL = WebElementObject
-
 
 	' Made it an if-else in case more functionality is to be added later.
 	If VerifyObjectExists(WebElementObject, 5, ParameterDescription(Parameter,"Web Element")) Then
@@ -1669,15 +2238,26 @@ Function VerifyWebElement(WebElementObject, Parameter)
 	End If
 End Function
 
-'Author: Adley Haywood
-'Purpose: Verifies a web radio group based on parameter data.
-'Modfied By: Brian Buckhana
+'**********************************************************************
+' Function Name: VerifyWebRadioGroup
+' Purpose: Verifies a web radio group based on parameter data.
+' Author: Adley Haywood at Orasi Software Inc.
+' Modfied By: Brian Buckhana at Orasi Software Inc.
+' Input:
+'   WebRadioGroupObject
+'   Parameter
+' Return: none
+' Prerequisites:
+'   Method ParameterDescription This is in the General library.
+'   Method ParameterValue This is in the General library.
+'   Method VerifyObjectExists This is in the General library.
+'   Object Reporter.ReportEvent
+'**********************************************************************
 Function VerifyWebRadioGroup(WebRadioGroupObject, Parameter)
 	Dim stringLength
 	Dim Verify
 	Set WRG = WebRadioGroupObject
 '	HID = WRG.GetROProperty("html id")
-
 
 	' Made it an if-else in case more functionality is to be added later.
 	If VerifyObjectExists(WebRadioGroupObject, 5, ParameterDescription(Parameter,"Web Radio Group")) Then
@@ -1719,9 +2299,20 @@ Function VerifyWebRadioGroup(WebRadioGroupObject, Parameter)
 
 End Function
 
-'Author: Unknown
-'Purpose:
-'Modfied By:
+'**********************************************************************
+' Function Name: VerifyWebRadioGroupReverse
+' Purpose: QUESTION Purpose Function Name: VerifyWebRadioGroupReverse?
+' Author: Unknown
+' Input:
+'   WebRadioGroupObject
+'   Parameter
+' Return: none
+' Prerequisites:
+'   Method ParameterDescription This is in the General library.
+'   Method ParameterValue This is in the General library.
+'   Method VerifyObjectExists This is in the General library.
+'   Object Reporter.ReportEvent
+'**********************************************************************
 Function VerifyWebRadioGroupReverse(WebRadioGroupObject, Parameter)
 	Dim stringLength
 	Dim Verify
@@ -1769,9 +2360,17 @@ Function VerifyWebRadioGroupReverse(WebRadioGroupObject, Parameter)
 
 End Function
 
-'Author: Brian Buckhana
-'Purpose: Mouses over web element and performs the action you want performed.
-'Modfied By:
+'**********************************************************************
+' Function Name: MouseoverWebElement
+' Purpose: Mouses over web element and performs the action you want performed.
+' Author: Brian Buckhana at Orasi Software Inc.
+' Input:
+'   WebElementObject
+'   ActionOfWebElement
+'   Parameter
+' Return: none
+' Prerequisites: none
+'**********************************************************************
 Function MouseoverWebElement(WebElementObject, ActionOfWebElement, Parameter)
 	Set oWL = WebElementObject
 	HID = oWL.GetROProperty("html id")
@@ -1796,8 +2395,18 @@ End Function
 
 
 '**********************************************************************
-'Function Name:	GetColumnWithCellText
-'
+' Function Name: GetColumnWithCellText
+' Purpose: QUESTION Purpose Function Name: GetColumnWithCellText?
+' Author: Unknown
+' Input:
+'   objTable
+'   strSearchText
+'   intSearchRow
+'   blnExact
+' Return: Integer column number in data table
+' Prerequisites: none
+'**********************************************************************
+' REVIEW Below lines need to be reviewed to detemine if needed
 'Call Function Using: objWebTable.GetColumnWithCellText(strSearchText, intSearchRow, blnExact)
 '
 '
@@ -1833,7 +2442,7 @@ Public Function GetColumnWithCellText(objTable, strSearchText, intSearchRow, bln
 	Dim intNumColumns
 	Dim intCurrentColumn
 	Dim blnFound
-
+' BUG rfDisableAll nont found
 	Reporter.Filter = rfDisableAll
 	blnFound = False
 
