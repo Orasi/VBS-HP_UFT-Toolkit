@@ -2108,7 +2108,7 @@ End Function
 '**********************************************************************
 ' Function Name: GetColumnWithCellText
 ' Purpose: This method will search the columns of a WebTable and return the column number of queried text
-' Author: Unknown
+' Author: Justin Phlegar
 ' Input:
 '   objTable
 '   strSearchText
@@ -2117,7 +2117,6 @@ End Function
 ' Return: Integer column number in data table
 ' Prerequisites: none
 '**********************************************************************
-' REVIEW Below lines need to be reviewed to detemine if needed
 'Call Function Using: objWebTable.GetColumnWithCellText(strSearchText, intSearchRow, blnExact)
 '
 '
