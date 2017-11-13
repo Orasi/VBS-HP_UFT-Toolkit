@@ -1331,7 +1331,7 @@ End Function
 
 '**********************************************************************
 ' Function Name: ET
-' Purpose: QUESTION Purpose Function Name: ET
+' Purpose: Runs the cleanup function and exits the test
 ' Author: Adam Thomas at Orasi Software Inc.
 ' Input: ET
 ' Return: None
