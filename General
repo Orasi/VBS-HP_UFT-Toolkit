@@ -537,6 +537,7 @@ End Function
 
 '**********************************************************************
 ' Function Name: SetFireFoxCertificates
+' Purpose: (Deprecated) Replaces systems copy of Firefox security certificate with one that is stored in ALM.
 ' Author: Adam Thomas at Orasi Software Inc.
 ' Input:
 '   CertOverrideALMResourceID
@@ -567,7 +568,7 @@ End Function
 
 '**********************************************************************
 ' Function Name: OverFlowEdit
-' Purpose: QUESTION Purpose Function Name: OverFlowEdit
+' Purpose: Attempts to imput a large string into an edit field. If box overflows, a false is returned and failure is written to the report.
 ' Author: Adam Thomas at Orasi Software Inc.
 ' Input:
 '   EditObject
