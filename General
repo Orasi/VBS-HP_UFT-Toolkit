@@ -1543,8 +1543,7 @@ End Function
 '   WebEditObject
 '   Parameter
 ' Return: none
-' Prerequisites: none
-' QUESTION What is method RSS()?
+' Prerequisites: RandomSS()
 '**********************************************************************
 'Modfied By: Brian Buckhana
 Function SetWebEdit(WebEditObject, Parameter)
@@ -1555,7 +1554,7 @@ Function SetWebEdit(WebEditObject, Parameter)
 	End If
 
 	If UCase(Parameter) = "<RANDOM_SSN>" or UCase(Parameter) = "<RANDOMSSN>" or UCase(Parameter) = "<RANDOMSS>" or UCase(Parameter) = "<RANDOM_SS>" Then
-		Parameter = CStr(RSS())
+		Parameter = CStr(RandomSS())
 	End If
 
 
@@ -1582,7 +1581,6 @@ End Function
 ' Prerequisites:
 '   Method SendKeys This is in the General Library. Sends key strokes to any
 '       active window or object
-' QUESTION What is method RSS()?
 '**********************************************************************
 Function SetWebElement(WebElementObject, Parameter)
 	Set oWE = WebElementObject
@@ -1592,7 +1590,7 @@ Function SetWebElement(WebElementObject, Parameter)
 	End If
 
 	If UCase(Parameter) = "<RANDOM_SSN>" or UCase(Parameter) = "<RANDOMSSN>" or UCase(Parameter) = "<RANDOMSS>" or UCase(Parameter) = "<RANDOM_SS>" Then
-		Parameter = CStr(RSS())
+		Parameter = CStr(RandomSS())
 	End If
 
 
