@@ -1826,53 +1826,6 @@ Function VerifyWebEdit(WebEditObject, Parameter)
 End Function
 
 '**********************************************************************
-' Function Name: VerifyVarText
-' Purpose: QUESTION Purpose Function Name: VerifyVarText
-' Author: Adam Thomas at Orasi Software Inc.
-' Input:
-'   TextVariable
-'   Parameter
-' Return: String TextVariable
-' Prerequisites:
-'   Object Reporter.ReportEvent
-'   Method ParameterDescription This is in the General library.
-'   Method ParameterValue This is in the General library.
-'**********************************************************************
-Function VerifyVarText(TextVariable, Parameter)
-	Dim stringLength
-	Dim Verify
-
-	Desc = ParameterDescription(Parameter,"Plain Text")
-	Parameter = ParameterValue(Parameter)
-
-	If Parameter <> "" Then
-		'HID = oWE.GetROProperty("html id")
-		Verify = TextVariable
-		stringLength = len(Parameter)
-		' Check for keywords; EX: <NULL>
-		If mid(Parameter, 1, 1) = "<" AND mid(Parameter, stringLength, 1) = ">"  Then
-			Select Case UCase(Verify)
-			Case "<NULL>", "<>", "<EMPTY>", "<NOTHING>", "<BLANK>", "<ISEMPTY>", "< >", "", " "
-				Reporter.ReportEvent micPass, "Verify Text '" & Desc & "' is <NULL>", "The WebEdit has the value of <NULL>."
-			Case Else
-				Reporter.ReportEvent micFail, "Verify Text '" & Desc & "' Improper Inputs", "Parameter: " &Parameter& ", Value: " &Verify
-			End Select
-		ElseIf Trim(uCase(Verify)) = Trim(uCase(Parameter)) AND mid(Verify, 1, 1) <> "<" Then
-			Reporter.ReportEvent micPass, "Verify Text '" & Desc & "'", "The WebEdit has the value of -" &Parameter& "-."
-		Else
-			Reporter.ReportEvent micFail, "Verify Text '" & Desc & "'", "The WebEdit does not have the value of -" &Parameter& "-."
-		End If
-	ElseIf TextVariable <> "" Then
-
-		Reporter.ReportEvent micPass, Desc & " captured", Desc & " captured with a value of: " & TextVariable
-
-	End If
-
-	VerifyVarText = TextVariable
-
-End Function
-
-'**********************************************************************
 ' Function Name: VerifyWebList
 ' Purpose: Verifies a weblist has the value of parameter passed in.
 ' Author: Adley Haywood at Orasi Software Inc.
