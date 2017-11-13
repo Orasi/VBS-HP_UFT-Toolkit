@@ -537,7 +537,6 @@ End Function
 
 '**********************************************************************
 ' Function Name: SetFireFoxCertificates
-' Purpose: QUESTION Purpose Function Name: SetFireFoxCertificates
 ' Author: Adam Thomas at Orasi Software Inc.
 ' Input:
 '   CertOverrideALMResourceID
