@@ -685,7 +685,7 @@ End Function
 '**********************************************************************
 ' Function Name: UpdateTestPlanField
 ' Purpose: Update test plan field with input value
-' Author: Vicky Chen at QUESTION Where did Vicky Chen come from?
+' Author: Vicky Chen 
 ' Input:
 '   StrStatus
 ' Return: None
