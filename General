@@ -173,55 +173,6 @@ Function SetSelectOptional(SelectObject, DatatableObject, Parameter)
 	End If
 End Function
 
-'**********************************************************************
-' Function Name: SelectNullAllItemsCombo @99
-' Purpose: QUESTION Purpose Function Name: SelectNullAllItemsCombo?
-'   Sample implementation:
-'   RegisterUserFunc "SwfComboBox", "SelectEnhanced", "SelectNullAllItemsCombo"
-' Author: Unknown
-' Input:
-'   ComboBoxObject Combo box object
-'   ItemText Item to be selected.
-' Return: none
-' Prerequisites:
-'   Method SendKeys This is in the General Library. Sends key strokes to any
-'       active window or object
-'   Object Reporter.ReportEvent
-'**********************************************************************
-Function SelectNullAllItemsCombo(ComboBoxObject, ItemText)
-	SuccessFlag = False
-	Set CO = ComboBoxObject
-	Count = CO.GetItemsCount()
-	CO.Click
-
-	For i = 0 To Count Step 1
-		If CO.GetROProperty("text") = ItemText Then
-			SuccessFlag = True
-			Exit For
-		End If
-		SendKeys "{DOWN}"
-		Wait 0,250
-	Next
-
-	If Not SuccessFlag Then
-		For i = 0 To Count Step 1
-			If CO.GetROProperty("text") = ItemText Then
-				SuccessFlag = True
-				Exit For
-			End If
-			SendKeys "{UP}"
-			Wait 0,250
-		Next
-	End If
-
-	Name = CO.GetRoProperty("swfname")
-	CurValue = CO.GetROProperty("text")
-	CO.Click ' force dropdown to close, to not cover up the "Add" button
-	If Not Successflag Then
-		Reporter.ReportEvent micFail, "Select from Combobox", "Combo object name: " & Name _
-		& ML(2) & "Item requested: " & ItemText & ML(2) & "Value Selected: " & CurValue
-	End If
-End Function
 
 '**********************************************************************
 ' Function Name: SetUpComponentData
