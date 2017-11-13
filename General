@@ -1887,29 +1887,6 @@ Function VerifyWebList(WebListObject, Parameter)
 End Function
 
 '**********************************************************************
-' Function Name: VerifyWebImage
-' Purpose: Verifies an image exists.
-' Author: Brian Buckhana at Orasi Software Inc.
-' Input:
-'   WebImageObject
-'   WebImageName
-' Return: none
-' Prerequisites:
-'   Method VerifyObjectExists This is in the General library.
-' BUG  Function VerifyWebImage not complete'
-'**********************************************************************
-Function VerifyWebImage(WebImageObject, WebImageName)
-
-	' Made it an if-else in case more functionality is to be added later.
-	If VerifyObjectExists(WebImageObject, 5, WebImageName) Then
-		' Nothing at the moment.
-	Else
-		' Exit the function maybe?
-	End If
-
-End Function
-
-'**********************************************************************
 ' Function Name: VerifyWebLink
 ' Purpose: Verifies a weblink has the value of parameter passed in.
 ' Author: Brian Buckhana at Orasi Software Inc.
