@@ -2132,7 +2132,7 @@ End Function
 
 '**********************************************************************
 ' Function Name: GetColumnWithCellText
-' Purpose: QUESTION Purpose Function Name: GetColumnWithCellText?
+' Purpose: This method will search the columns of a WebTable and return the column number of queried text
 ' Author: Unknown
 ' Input:
 '   objTable
