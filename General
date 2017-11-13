@@ -654,12 +654,11 @@ End Function
 ' Input:
 '   NumberOfLines
 ' Return: String of New linges
-' Prerequisites: none
-' REVIEW Should chr(13) & chr(10) be replaced with l()?
+' Prerequisites: l and NL functions
 '**********************************************************************
 Function ML(NumberOfLines)
    For n = 1 to NumberOfLines
-		 nl = nl & chr(13) & chr(10)
+		 nl = nl & L
    Next
    ML = nl
 End Function
