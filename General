@@ -493,7 +493,7 @@ End Function
 
 '**********************************************************************
 ' Function Name: oDateDiff
-' Purpose: QUESTION Purpose Function Name: oDateDiff
+' Purpose: Takes two comma delimited dates and returns the number of intervals between those two dates
 ' Author: Adam Thomas at Orasi Software Inc.
 ' Input:
 '   DateString
