@@ -1360,12 +1360,6 @@ Function GetClipBoardText()
 	GetClipBoardText = objHTML.ParentWindow.ClipboardData.GetData("text")
 	objHTML.close
 	Set objHTML = Nothing
-
-'NOTE remove lines below'
-	'Set objIE = CreateObject("InternetExplorer.Application")
-    ' objIE.Navigate("about:blank")
-    ' GetClipBoardText = objIE.document.parentwindow.clipboardData.GetData("text")
-    ' objIE.Quit
 End Function
 
 
