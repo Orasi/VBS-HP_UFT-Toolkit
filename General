@@ -292,7 +292,6 @@ End Function
 '  Object  reporter.ReportEvent Uses UFT report tool for log results.
 '   Method ReportingOff This is located in General library.
 '   Method ReportingOn This is located in General library.
-'BUG  Function Name: IESave Need to store the current DefaultTimeOut and set it back when function is done'
 '**********************************************************************
 Function IESave(Timeout)
 	ReportingOff
@@ -951,7 +950,6 @@ Function Decrypt(str,key)
 ' Return: none
 ' Prerequisites:
 '   Object Reporter.ReportEvent
-' NOTE Recommend capture time before setting new vale so it can be set back.
 '**********************************************************************
 Function GenericWaitForLoad(TimeoutInSeconds, LoadingIconObject)
 	ReportLoaded = False
@@ -1263,7 +1261,6 @@ End Function
 ' Input: None
 ' Return: None
 ' Prerequisites: None
-' REVIEW  Should the existing timeout be stored to reset later usage?
 '**********************************************************************
 Function DefaultTimeout()
 	If Environment.Value("TO") <>"" Then
@@ -1517,7 +1514,7 @@ End Function
 '**********************************************************************
 ' Function Name: RandomSS
 ' Purpose:  Returns a unique social security number. Does not comply
-'   with all SS rules TODO Purpose
+'   with all SS rules 
 ' Author: Adam Thomas at Orasi Software Inc.
 ' Input: None
 ' Return: String
@@ -2147,7 +2144,6 @@ Public Function GetColumnWithCellText(objTable, strSearchText, intSearchRow, bln
 	Dim intNumColumns
 	Dim intCurrentColumn
 	Dim blnFound
-' BUG rfDisableAll nont found
 	Reporter.Filter = 3
 	blnFound = False
 
