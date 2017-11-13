@@ -1179,7 +1179,7 @@ End Function
 
 '**********************************************************************
 ' Function Name: LoadStep
-' Purpose: QUESTION Purpose Function Name: LoadStep?
+' Purpose: Works with ‘LoadBar’ function to progress the bar.
 ' Author: Perry Thomas Orasi
 ' Input: none
 ' Return: none
