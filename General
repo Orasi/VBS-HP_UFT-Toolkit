@@ -632,8 +632,7 @@ Function OverFlowEditReq(EditObject,CharacterQty, ReqID, Message)
 	Else
 		Result = False
 	End If
-    ' BUG Should line below be > OverFlowEditReq = Result
-	OverFlow = Result
+    OverFlowEditReq = Result
 End Function
 
 '**********************************************************************
