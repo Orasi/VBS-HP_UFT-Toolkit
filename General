@@ -1345,19 +1345,6 @@ Function ET
 End Function
 
 '**********************************************************************
-' Function Name: CleanRecovery
-' Purpose: QUESTION Purpose  Function Name: CleanRecovery it is blank function
-' Author: Adam Thomas at Orasi Software Inc.
-' Input:
-'   Object
-' Return: none
-' Prerequisites: none
-'**********************************************************************
-Function CleanRecovery(Object)
-
-End Function
-
-'**********************************************************************
 ' Function Name: GetClipBoardText
 ' Purpose: Returns contents of the currren clipboard
 'QUESTION Function GetClipBoardText should it use Mercury clipboard instead?
