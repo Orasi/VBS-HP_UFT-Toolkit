@@ -955,7 +955,8 @@ Function Decrypt(str,key)
 '**********************************************************************
 Function GenericWaitForLoad(TimeoutInSeconds, LoadingIconObject)
 	ReportLoaded = False
-	Setting("DefaultLoadTime ")= "1000"
+    OldDefaultLoadTime = Setting("DefaultLoadTime")
+	Setting("DefaultLoadTime") = "1000"
 	StartTime = timer
 	For t = 1 To TimeoutInSeconds Step 1
 		If LoadingIconObject.Exist(2) Then
@@ -979,6 +980,7 @@ Function GenericWaitForLoad(TimeoutInSeconds, LoadingIconObject)
 	Else
 		reporter.ReportEvent micPass, "Waiting for page to load", "Loading timed out after " & Round(EndTime - StartTime,2) & " seconds."
 	End If
+    Setting("DefaultLoadTime") = OldDefaultLoadTime
 End Function
 
 '**********************************************************************
