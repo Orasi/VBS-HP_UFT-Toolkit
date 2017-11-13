@@ -1522,7 +1522,7 @@ End Function
 '**********************************************************************
 ' Function Name: RandomSS
 ' Purpose:  Returns a unique social security number. Does not comply
-'   with all SS rulesTODO Purpose
+'   with all SS rules TODO Purpose
 ' Author: Adam Thomas at Orasi Software Inc.
 ' Input: None
 ' Return: String
@@ -1697,29 +1697,6 @@ Function ParameterValue(ParameterText)
 	Else
 		ParameterValue = ""
 	End If
-End Function
-
-'**********************************************************************
-' Function Name: ParameterDescription
-' Purpose: QUESTION Purpose Function Name: ParameterDescription?
-' Author: Adam Thomas at Orasi Software Inc.
-' Input:
-'   ParameterText
-'   DefaultDescription
-' Return: Returns string of input string which is the second item.
-' Prerequisites: none
-'**********************************************************************
-Function ParameterDescription(ParameterText, DefaultDescription)
-	If ParameterText <> "" Then
-		If UBound(Split(ParameterText, "#")) = 1 Then
-			ParameterDescription = Split(ParameterText, "#")(1)
-		Else
-			ParameterDescription = DefaultDescription
-		End If
-	Else
-		ParameterDescription = DefaultDescription
-	End If
-
 End Function
 
 '**********************************************************************
