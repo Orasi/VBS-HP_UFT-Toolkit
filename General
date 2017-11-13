@@ -2097,67 +2097,6 @@ Function VerifyWebRadioGroup(WebRadioGroupObject, Parameter)
 End Function
 
 '**********************************************************************
-' Function Name: VerifyWebRadioGroupReverse
-' Purpose: QUESTION Purpose Function Name: VerifyWebRadioGroupReverse?
-' Author: Unknown
-' Input:
-'   WebRadioGroupObject
-'   Parameter
-' Return: none
-' Prerequisites:
-'   Method ParameterDescription This is in the General library.
-'   Method ParameterValue This is in the General library.
-'   Method VerifyObjectExists This is in the General library.
-'   Object Reporter.ReportEvent
-'**********************************************************************
-Function VerifyWebRadioGroupReverse(WebRadioGroupObject, Parameter)
-	Dim stringLength
-	Dim Verify
-	Set WRG = WebRadioGroupObject
-'	HID = WRG.GetROProperty("html id")
-
-
-	' Made it an if-else in case more functionality is to be added later.
-	If VerifyObjectExists(WebRadioGroupObject, 5, ParameterDescription(Parameter,"Web Radio Group")) Then
-		' Do nothing at the moment.
-		Parameter = ParameterValue(Parameter)
-
-		If Parameter <> "" Then
-			HID = WRG.GetROProperty("html id")
-			Verify = WRG.GetROProperty("value")
-			stringLength = len(Parameter)
-			' Check for keywords; EX: <NULL>
-			If mid(Parameter, 1, 1) = "<" AND mid(Parameter, stringLength, 1) = ">"  Then
-				Select Case UCase(Verify)
-				Case "<NULL>", "<>", "<EMPTY>", "<NOTHING>", "<BLANK>", "<ISEMPTY>", "< >", "", " "
-					Reporter.ReportEvent micPass, "Verify WebRadioGroup '" & HID & "' is <NULL>", "The WebRadioGroup has the value of <NULL>."
-				Case Else
-					Reporter.ReportEvent micFail, "Verify WebRadioGroup '" & HID & "' Improper Inputs", "Parameter: " &Parameter& ", Value: " &Verify
-				End Select
-			Else
-				Select Case UCase(Parameter)
-					Case "ON", "SELECT", "SELECTED", "CHECK", "CHECKED", TRUE, "TRUE", "1", "YES"
-						If uCase(Verify) = "1" Then
-							 Reporter.ReportEvent micPass, "Verify WebRadioGroup '" & HID & "'", "The WebRadioGroup has the value of 'Yes' or 'On'"
-						Else
-							 Reporter.ReportEvent micFail, "Verify WebRadioGroup '" & HID & "'", "The WebRadioGroup does not have the value of 'Yes' or 'On'"
-						End If
-					Case Else
-						If uCase(Verify) = "0" Then
-							 Reporter.ReportEvent micPass, "Verify WebRadioGroup '" & HID & "'", "The WebRadioGroup has the value of 'No' or 'Off'"
-						Else
-							 Reporter.ReportEvent micFail, "Verify WebRadioGroup '" & HID & "'", "The WebRadioGroup does not have the value of 'No' or 'Off'"
-						End If
-				End Select
-			End If
-
-		End If
-
-	End If
-
-End Function
-
-'**********************************************************************
 ' Function Name: MouseoverWebElement
 ' Purpose: Mouses over web element and performs the action you want performed.
 ' Author: Brian Buckhana at Orasi Software Inc.
