@@ -297,7 +297,8 @@ End Function
 Function IESave(Timeout)
 	ReportingOff
 	PossibleOldDL = GetLatestDownload()
-	Setting("DefaultTimeOut")= "500"
+    OldDefaultTimeOut = Setting("DefaultTimeOut")
+    Setting("DefaultTimeOut") = "500"
 	Break = False
 	Success = False
 	StartTime = Timer
@@ -351,7 +352,7 @@ Function IESave(Timeout)
 		End If
 		IESave = SL
 	End If
-	Setting("DefaultTimeOut")= "30000"
+	Setting("DefaultTimeOut") = OldDefaultTimeOut
 End Function
 
 '**********************************************************************
