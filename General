@@ -84,7 +84,7 @@ End Function
 '	Method InstantiateExcel This is located in the EXCEL libary.  Use to
 '		Instantiate an Excel sheet.
 '	Sheet "TestData.xlsx"   File used to hold data
-' REVIEW Recommend check to see if '"TestData.xlsx" exist
+'        Recommend check to see if '"TestData.xlsx" exist
 '**********************************************************************
 Function GetTestParameter(TestParameter, Iteration)
 	CurrentTestID = GetCurrentTestID()
