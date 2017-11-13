@@ -613,7 +613,6 @@ End Function
 '   Message
 ' Return: String
 ' Prerequisites:
-'   QUESTION What is ValidateRequirement?  Does not exist
 '**********************************************************************
 Function OverFlowEditReq(EditObject,CharacterQty, ReqID, Message)
 	LongString = ""
@@ -629,11 +628,8 @@ Function OverFlowEditReq(EditObject,CharacterQty, ReqID, Message)
 	EditObject.Set LongString
 	AfterLen = Len(EditObject.GetROProperty("value"))
 	If BeforeLen = AfterLen Then
-
-		ValidateRequirement "Passed", Message, BeforeLen & " Characters entered into the edit box, " & AfterLen & " characters persisted.", ReqID
 		Result = True
 	Else
-		ValidateRequirement "Failed", Message, BeforeLen & " Characters entered into the edit box, " & AfterLen & " characters persisted.", ReqID
 		Result = False
 	End If
     ' BUG Should line below be > OverFlowEditReq = Result
