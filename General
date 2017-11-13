@@ -685,7 +685,7 @@ End Function
 '**********************************************************************
 ' Function Name: UpdateTestPlanField
 ' Purpose: Update test plan field with input value
-' Author: Vicky Chen 
+' Author: Vicky Chen
 ' Input:
 '   StrStatus
 ' Return: None
@@ -984,7 +984,7 @@ End Function
 
 '**********************************************************************
 ' Function Name: CheckZero
-' Purpose: QUESTION Purpose Function Name: CheckZero
+' Purpose: Checks that a given string represents a 0 amount. Used for accounting.
 ' Author: Adam Thomas at Orasi Software Inc.
 ' Input:
 '   StringInQuestion
