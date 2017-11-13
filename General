@@ -2155,7 +2155,7 @@ Public Function GetColumnWithCellText(objTable, strSearchText, intSearchRow, bln
 	Dim intCurrentColumn
 	Dim blnFound
 ' BUG rfDisableAll nont found
-	Reporter.Filter = rfDisableAll
+	Reporter.Filter = 3
 	blnFound = False
 
 	'Get the number of columns for the row being searched
