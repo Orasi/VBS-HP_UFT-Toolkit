@@ -598,8 +598,8 @@ Function OverFlowEdit(EditObject,CharacterQty, Message)
 		Reporter.ReportEvent micFail, Message, BeforeLen & " Characters entered into the edit box, " & AfterLen & " characters persisted."
 		Result = False
 	End If
-    ' BUG Should line below be > OverFlowEdit = Result
-	OverFlow = Result
+
+	OverFlowEdit = Result
 End Function
 
 '**********************************************************************
