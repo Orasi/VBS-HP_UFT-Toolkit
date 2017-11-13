@@ -1107,7 +1107,7 @@ End Function
 '**********************************************************************
 ' Function Name: LoadBar
 ' Purpose: Draws a windows forms style load bar to graphically show progress.
-' Author: Perry Thomas  QUESTION where did Perry Thomas come from?
+' Author: Perry Thomas Orasi
 ' Input:
 '   OnOffSwitch
 '   BarTitle
@@ -1180,7 +1180,7 @@ End Function
 '**********************************************************************
 ' Function Name: LoadStep
 ' Purpose: QUESTION Purpose Function Name: LoadStep?
-' Author: Perry Thomas QUESTION Where did Perry Thomas come from?
+' Author: Perry Thomas Orasi
 ' Input: none
 ' Return: none
 ' Prerequisites:
