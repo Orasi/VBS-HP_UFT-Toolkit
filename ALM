@@ -1,6 +1,16 @@
-'Author: Adam Thomas
-'Purpose: To load a file into a known resource
-'Modfied By:
+
+'**********************************************************************
+' Function Name: QCSetResource
+' Purpose: To load a file into a known resource
+' Author: Adam Thomas at Orasi Software Inc.
+' Input:
+'   resourceFolderId
+'   fileType
+'   fileName
+'   ParentPath
+' Return: Resource ID
+' Prerequisites: None
+'**********************************************************************
 Function QCSetResource(resourceFolderId,fileType,fileName,ParentPath)
     'On Error Resume Next
     Set TDConn = QCUtil.QCConnection
@@ -47,7 +57,7 @@ Function QCSetResource(resourceFolderId,fileType,fileName,ParentPath)
             CI.ResourceType= fileType
             CI.Post
             Wait(1)
-            CI.VC.CheckOut ""          
+            CI.VC.CheckOut ""
 			Wait(1)
             CI.UploadResource ParentPath, True
             Wait(2)
@@ -63,18 +73,24 @@ Function QCSetResource(resourceFolderId,fileType,fileName,ParentPath)
         resourceItem.vC.CheckIn "Automated check-in by utility" & Now()
     End If
     Set resourceItem = Nothing
-              Set currResourceList = Nothing
-		    Set TDConn = Nothing
-		    Set resourceFolderFactory = Nothing
-		    Set resourceFolder = Nothing
-		    Set resourceFactory = Nothing
-		    Set currResourceList = Nothing
+    Set currResourceList = Nothing
+    Set TDConn = Nothing
+    Set resourceFolderFactory = Nothing
+    Set resourceFolder = Nothing
+    Set resourceFactory = Nothing
+    Set currResourceList = Nothing
   	QCSetResource = ID
 End Function
 
-'Author: Adam Thomas
-'Purpose: Uploads an attachment to the current test
-'Modfied By:
+'**********************************************************************
+' Function Name: UploadAttachment
+' Purpose: Uploads an attachment to the current test
+' Author: Adam Thomas at Orasi Software Inc.
+' Input:
+'   FilePath
+' Return: none
+' Prerequisites: None
+'**********************************************************************
 Function UploadAttachment(FilePath)
 	Set ObjCurrentTest = QCUtil.CurrentTestSetTest.Attachments
 	Set ObjAttch = ObjCurrentTest.AddItem(Null)
@@ -84,18 +100,31 @@ Function UploadAttachment(FilePath)
 	ObjAttch.Refresh
 End Function
 
-'Author: Adam Thomas
-'Purpose: To return the ALM Test id for the test currently executing
-'Modfied By:
+'**********************************************************************
+' Function Name: GetCurrentTestID
+' Purpose: To return the ALM Test id for the test currently executing
+' Author:  Adam Thomas at Orasi Software Inc.
+' Input: None
+' Return: Test ID
+' Prerequisites:
+'**********************************************************************
 Function GetCurrentTestID()
 	Set CurrenttestID = QCUtil.CurrentTest
 	GetCurrentTestID = CurrenttestID.ID
 End Function
 
-'Author: Adam Thomas
-'Purpose: Uploads a file to a given resource ID. Resource path is the full path including file name and extension. 
-'Modfied By:
-Public  Function UploadResource(ResourcePath,ResourceID)  
+'**********************************************************************
+' Function Name: UploadResource
+' Purpose: Uploads a file to a given resource ID. Resource path is the
+'   full path including file name and extension.
+' Author: Adam Thomas at Orasi Software Inc.
+' Input:
+'   ResourcePath
+'   ResourceID
+' Return: none
+' Prerequisites: None
+'**********************************************************************
+Public  Function UploadResource(ResourcePath,ResourceID)
    'Declare
     Dim aName
 	Dim FoundBool
@@ -150,7 +179,7 @@ Public  Function UploadResource(ResourcePath,ResourceID)
 			oSub.ResourceType = "Test Resource"
 		On Error GoTo 0
 		oSub.Post
-		oSub.UploadResource ResourcePath, True 
+		oSub.UploadResource ResourcePath, True
 		Reporter.ReportEvent micDone, "Resource Uploaded", "Resource ID: "&ResourceID
 	Else
 		Reporter.ReportEvent micFail, "Resource Not Found", "Resource ID: "&ResourceID&" not found in ALM."
@@ -158,32 +187,57 @@ Public  Function UploadResource(ResourcePath,ResourceID)
 End Function
 
 
-'Author: Adam Thomas
-'Purpose: Downloads an attachment from any test to a local/network path
-'Modfied By:
+'**********************************************************************
+' Function Name: DownloadAttachmentFromTest
+' Purpose: Downloads an attachment from any test to a local/network path
+' Author:  Adam Thomas at Orasi Software Inc.
+' Input:
+'   ByVal TestID
+'   ByVal FileName
+'   ByVal OutPath
+' Return: String
+' Prerequisites:
+'   Method CopyFile This is in the FileSystem Library
+'   Method GetAttachmentFromTestObject This is in the ALM Library
+'**********************************************************************
 Public Function DownloadAttachmentFromTest(ByVal TestID, ByVal FileName, ByVal OutPath)
 	If InStr(FileName, "\") > 0 Then
 		DownloadAttachmentFromTest = CopyFile(FileName, "Temp")
 	Else
 		Dim TDConnection
 		Set TDConnection = QCUtil.TDConnection
-	
+
 		Dim TestList
 		Set TestList = TDConnection.TestFactory.NewList("SELECT * FROM TEST WHERE TS_TEST_ID = " & TestID)
-	
+
 		' For use with test name: Set TestList = TDConnection.TestFactory.NewList("SELECT * FROM TEST WHERE TS_NAME = '" & TestName & "'")
-	
+
 		If UCase(OutPath) = "TEMP" Then
 			OutPath = GetSystemTempFolder
 		End If
-		
+
 		DownloadAttachmentFromTest = GetAttachmentFromTestObject(TestList(1), FileName, OutPath)
 	End If
 End Function
 
-'Author: Adam Thomas
-'Purpose: 
-'Modfied By:
+'**********************************************************************
+' Function Name: RenameAttachmentFromTest
+' Purpose: QUESTION Purpose Function Name: RenameAttachmentFromTest
+' Author: Adam Thomas at Orasi Software Inc.
+' Input:
+'   ByVal TestID
+'   ByVal CurrentAttachmentName
+'   ByVal NewAttachmentName
+' Return: Boolean
+' Prerequisites:
+'   Method GetSystemTempFolder This is in the Filesystem Library
+'   Method CreateTempFolder This is in the Filesystem Library
+'   Method DownloadAttachmentFromTest This is in the ALM Library
+'   Method RenameFile This is in the Filesystem Library
+'   Method RemoveAttachmentFromTest This is in the ALM Library
+'   Method UploadAttachmentToTest This is in the ALM Library
+'   Method DeleteFileByPath This is in the Filesystem Library
+'**********************************************************************
 Public Function RenameAttachmentFromTest(ByVal TestID, ByVal CurrentAttachmentName, ByVal NewAttachmentName)
 
 	TempPath = GetSystemTempFolder()
@@ -195,68 +249,83 @@ Public Function RenameAttachmentFromTest(ByVal TestID, ByVal CurrentAttachmentNa
 	TempAttachmentPath = DownloadAttachmentFromTest(TestID, CurrentAttachmentName, TempPath)
 
 	If TempAttachmentPath <> "" Then
-			
+
 		'rename file
 		NewPath = RenameFile(TempPath & CurrentAttachmentName, NewAttachmentName)
-		
+
 		'delete from test plan
 		RemoveAttachmentFromTest TestID, CurrentAttachmentName
-		 
+
 		'upload renamed to test plan
-		UploadAttachmentToTest TestID, NewPath 
-		
+		UploadAttachmentToTest TestID, NewPath
+
 		'delete local
 		DeleteFileByPath(NewPath)
-		
+
 		SuccessFlag = TRUE
-		
+
 	End If
 	RenameAttachmentFromTest = SuccessFlag
-		
+
 End Function
 
-'Author: Adam Thomas
-'Purpose: Downloads an attachment from an ALM object
-'Modfied By:
+'**********************************************************************
+' Function Name: GetAttachmentFromTestObject
+' Purpose: Downloads an attachment from an ALM object
+' Author: Adam Thomas at Orasi Software Inc.
+' Input:
+'   ByRef Object
+'   ByVal FileName
+'   ByVal OutPath
+' Return: String of the output file
+' Prerequisites: None
+'**********************************************************************
 Public Function GetAttachmentFromTestObject(ByRef Object, ByVal FileName, ByVal OutPath)
-Dim strRetVal
-strRetVal = ""
+    Dim strRetVal
+    strRetVal = ""
 
-Dim AttachmentFactory, AttachmentList
-Set AttachmentFactory = Object.Attachments
-Set AttachmentList = AttachmentFactory.NewList("")
+    Dim AttachmentFactory, AttachmentList
+    Set AttachmentFactory = Object.Attachments
+    Set AttachmentList = AttachmentFactory.NewList("")
 
-'Ensure path ends with "\"
-If Right(OutPath, 1) <> "\" Then
-OutPath = OutPath & "\"
-End If
+    'Ensure path ends with "\"
+    If Right(OutPath, 1) <> "\" Then
+        OutPath = OutPath & "\"
+    End If
 
-Dim Attachment, LongFileName, ExtendedStorage
-For Each Attachment In AttachmentList
-If StrComp(Attachment.Name(1), FileName, 1) = False Then ' Equal
-LongFileName = Attachment.Name 'Actual ServerFileName of attachment in QC.
-Set ExtendedStorage = Attachment.AttachmentStorage
-ExtendedStorage.ClientPath = OutPath
-ExtendedStorage.Load LongFileName, True
+    Dim Attachment, LongFileName, ExtendedStorage
+    For Each Attachment In AttachmentList
+        If StrComp(Attachment.Name(1), FileName, 1) = False Then ' Equal
+            LongFileName = Attachment.Name 'Actual ServerFileName of attachment in QC.
+            Set ExtendedStorage = Attachment.AttachmentStorage
+            ExtendedStorage.ClientPath = OutPath
+            ExtendedStorage.Load LongFileName, True
 
-Dim objFSO
-Set objFSO = CreateObject("Scripting.FileSystemObject")
-DeleteFileByPath OutPath & FileName
-objFSO.CopyFile OutPath & LongFileName, OutPath & FileName, True
-DeleteFileByPath OutPath & LongFileName
-strRetVal = OutPath & FileName
+            Dim objFSO
+            Set objFSO = CreateObject("Scripting.FileSystemObject")
+            DeleteFileByPath OutPath & FileName
+            objFSO.CopyFile OutPath & LongFileName, OutPath & FileName, True
+            DeleteFileByPath OutPath & LongFileName
+            strRetVal = OutPath & FileName
 
-Set objFSO = Nothing
-Exit For
-End If
-Next
+            Set objFSO = Nothing
+            Exit For
+        End If
+    Next
 
-GetAttachmentFromTestObject = strRetVal
+    GetAttachmentFromTestObject = strRetVal
 End Function
 
-'Author: Adam Thomas
-'Purpose: Uploads an attachment to any test from a local/network path
-'Modfied By:
+'**********************************************************************
+' Function Name: UploadAttachmentToTest
+' Purpose: Uploads an attachment to any test from a local/network path
+' Author: Adam Thomas at Orasi Software Inc.
+' Input:
+'   ByVal TestID
+'   ByVal LocalPath
+' Return: none
+' Prerequisites: None
+'**********************************************************************
 Public Function UploadAttachmentToTest(ByVal TestID, ByVal LocalPath)
 
 	Dim TDConnection
@@ -267,10 +336,10 @@ Public Function UploadAttachmentToTest(ByVal TestID, ByVal LocalPath)
 	Set TestList = TDConnection.TestFactory.NewList("SELECT * FROM TEST WHERE TS_TEST_ID = " & TestID)
 
 ' For use with test name: Set TestList = TDConnection.TestFactory.NewList("SELECT * FROM TEST WHERE TS_NAME = '" & TestName & "'")
-	
-	Set ObjAttch = TestList(1).Attachments 
+
+	Set ObjAttch = TestList(1).Attachments
 	Set Attacher = ObjAttch.AddItem(null)
-	
+
 	Attacher.FileName = FilePath
 	Attacher.Type = 1
 	Attacher.Post
@@ -278,9 +347,15 @@ Public Function UploadAttachmentToTest(ByVal TestID, ByVal LocalPath)
 
 End Function
 
-'Author: Adam Thomas
-'Purpose: Gets the name of the test from the test ID
-'Modfied By:
+'**********************************************************************
+' Function Name: GetTestNameFromID
+' Purpose: Gets the name of the test from the test ID
+' Author: Adam Thomas at Orasi Software Inc.
+' Input:
+'   ALMTestID
+' Return: String Test
+' Prerequisites: None
+'**********************************************************************
 Public Function GetTestNameFromID(ALMTestID)
 	Dim TDConnection
 	Set TDConnection = QCUtil.TDConnection
@@ -289,9 +364,16 @@ Public Function GetTestNameFromID(ALMTestID)
 	GetTestNameFromID = TestList(1).Name
 End Function
 
-'Author: Adam Thomas
-'Purpose: Removes an attachment from any test
-'Modfied By:
+'**********************************************************************
+' Function Name: RemoveAttachmentFromTest
+' Purpose: Removes an attachment from any test
+' Author: Adam Thomas at Orasi Software Inc.
+' Input:
+'   ByVal TestID
+'   ByVal Filename
+' Return: None
+' Prerequisites: Nonw
+'**********************************************************************
 Public Function RemoveAttachmentFromTest(ByVal TestID, ByVal Filename)
 
 	Dim TDConnection
@@ -301,7 +383,7 @@ Public Function RemoveAttachmentFromTest(ByVal TestID, ByVal Filename)
 	SuccessFlag = False
 	Set TestList = TDConnection.TestFactory.NewList("SELECT * FROM TEST WHERE TS_TEST_ID = " & TestID)
 	' For use with test name: Set TestList = TDConnection.TestFactory.NewList("SELECT * FROM TEST WHERE TS_NAME = '" & TestName & "'")
-	Set ObjAttch = TestList(1).Attachments 
+	Set ObjAttch = TestList(1).Attachments
 	Set attchList = ObjAttch.NewList("")
 
 	For each attch in attchList
@@ -314,15 +396,21 @@ Public Function RemoveAttachmentFromTest(ByVal TestID, ByVal Filename)
 	If SuccessFlag Then
 		objAttch.RemoveItem(objTempAtch.ID)
 	End If
-
+    ' BUG below should be using RemoveAttachmentFromTest '
 	RenameAttachmentInTest = SuccessFlag
 
 End Function
 
 
-'Author: Adam Thomas
-'Purpose: Downloads a resource by resource ID
-'Modfied By:
+'**********************************************************************
+' Function Name: QCGetResource
+' Purpose: Downloads a resource by resource ID
+' Author: Adam Thomas at Orasi Software Inc.
+' Input:
+'   resourceID
+' Return: string path
+' Prerequisites: None
+'**********************************************************************
 Function QCGetResource(resourceID)
 
 	On Error Resume Next
@@ -335,8 +423,8 @@ Function QCGetResource(resourceID)
 
 	Set objShell = CreateObject("WScript.Shell")
 	Set colEnvironment = objShell.Environment("PROCESS")
-	
-	
+
+
 	objPath = GetSystemTempFolder()
 
 	If oResourceList.Count = 1 Then
@@ -354,7 +442,7 @@ Function QCGetResource(resourceID)
 	End If
 
 	QCGetResource = objPath & "\" & oFile.FileName
-	
+
 	Set qcConn = Nothing
 	Set oResource = Nothing
 	Set oFilter = Nothing
@@ -365,9 +453,15 @@ Function QCGetResource(resourceID)
 
 End Function
 
-'Author: Adam Thomas
-'Purpose: Returns the name of a test with a given test ID. 
-'Modfied By:
+'**********************************************************************
+' Function Name: GetTestNameFromID
+' Purpose: Returns the name of a test with a given test ID.
+' Author: Adam Thomas at Orasi Software Inc.
+' Input:
+'   ALMTestID
+' Return: String Name
+' Prerequisites: None
+'**********************************************************************
 Public Function GetTestNameFromID(ALMTestID)
 	Dim TDConnection
 	Set TDConnection = QCUtil.TDConnection
@@ -377,83 +471,108 @@ Public Function GetTestNameFromID(ALMTestID)
 End Function
 
 
-'Author: Adam Thomas
-'Purpose: Returns an array list of sub folder IDs belonging to all parent folder ids given
+'**********************************************************************
+' Function Name: FindAllSubFolders
+' Purpose: Returns an array list of sub folder IDs belonging to all
+'   parent folder ids given
+' Author: Adam Thomas at Orasi Software Inc.
+' Input:
+'   RootFolderIDs
+'   Depth
+' Return: ArrayList
+' Prerequisites: None
+'**********************************************************************
 Function FindAllSubFolders(RootFolderIDs, Depth)
-	
+
 	Set FoldersToScanCurrently = CreateObject( "System.Collections.ArrayList")
 	Set FoldersToScanNext = CreateObject( "System.Collections.ArrayList")
 	Set FoldersFound = CreateObject( "System.Collections.ArrayList")
-	
-	
+
+
 	'Set root folders up
 	aRootFolderIDs = Split(RootFolderIDs, ",")
 	For each RootFolderID in aRootFolderIDs
 		FoldersToScanCurrently.add Trim(RootFolderID)
 	Next
-	
+
 	Set oTDC = QCUtil.QCConnection
 	Set oResourceFolder = oTDC.QCResourceFolderFactory
-	
-	
+
+
 	For d = 1 To Depth
 		family = 0
-		
+
 		For Each folder in FoldersToScanCurrently
 			FoldersFound.add folder
-			Set Temp = GetChildren(Folder) 
-			
+			Set Temp = GetChildren(Folder)
+
 			For each item in Temp
 				FoldersToScanNext.Add item
 			Next
-			
+
 			family = family + Temp.Count
 			Temp.Clear()
 		Next
-		
+
 		FoldersToScanCurrently.Clear()
-		
+
 		For Each item in FoldersToScanNext
 			FoldersToScanCurrently.Add item
 		Next
-	
+
 		FoldersToScanNext.Clear()
-		
+
 		If Family = 0 Then
 			Exit For
 		End If
-	
-	Next 
+
+	Next
 
 	Set FindAllSubFolders = FoldersFound
 End Function
 
-'Author: Adam Thomas
-'Purpose: Returns an array list of sub folder IDs belonging to a single folder. For use with the 'FindAllSubFolders' function
+'**********************************************************************
+' Function Name: GetChildren
+' Purpose: Returns an array list of sub folder IDs belonging to a
+'   single folder. For use with the 'FindAllSubFolders' function
+' Author: Adam Thomas at Orasi Software Inc.
+' Input:
+    'RootID'
+' Return: ArrayList of children
+' Prerequisites: None
+'**********************************************************************
 Function GetChildren(RootID)
 
 		Set Children = CreateObject( "System.Collections.ArrayList")
-		
+
 		Set oTDC = QCUtil.QCConnection
 		Set oResourceFolder = oTDC.QCResourceFolderFactory
-	
+
 		Set Root = oResourceFolder.item(RootID)
 		Set ChildrenFolders = Root.QCResourceFolderFactory.NewList("")
-		
+
 		ChildrenCount = ChildrenFolders.Count
-		
+
 		For f = 1 To ChildrenCount Step 1
 			Children.add ChildrenFolders.Item(f).ID
 		Next
-		
+
 		Set GetChildren = Children
-		
+
 End Function
 
-'Author: Adam Thomas
-'Purpose: Returns an array list of data sheet IDs belonging to all folder ids given
+'**********************************************************************
+' Function Name: GetXLSFilesFromFolder
+' Purpose: Returns an array list of data sheet IDs belonging to all
+'   folder ids given
+' Author: Adam Thomas at Orasi Software Inc.
+' Input:
+'   aRootFolderIDs
+' Return: ArrayList
+' Prerequisites: None
+'**********************************************************************
 Function GetXLSFilesFromFolder(aRootFolderIDs)
-	
+
 	Dim aName
 	Dim FoundBool
 	Dim oTDC
@@ -465,52 +584,52 @@ Function GetXLSFilesFromFolder(aRootFolderIDs)
 	Dim CurItem
 	Dim FileName
 	Set SheetIDs = CreateObject( "System.Collections.ArrayList" )
-	
+
 	If NOT(QCUtil.isConnected) Then
 		Reporter.ReportEvent micFail, "Not Connected to QC", "QTP isn't connected to QC and can't download the file"
 		QCImport = False
 			'Exit Function
 	End If
 
-	
+
 	Set oTDC = QCUtil.QCConnection
 	Set oResourceFolder = oTDC.QCResourceFolderFactory
-	
+
 	For each RootFolderID in aRootFolderIDs
-			
+
 		RootFolderID = Trim(RootFolderID)
-	
+
 		'Checks QC connectivity
 
 		'Set oResourceFactory = oTDC.QCResourceFactory
-		
-		
+
+
 		Set Root = oResourceFolder.item(RootFolderID)
 		Set oResourceFactory = Root.QCResourceFactory
 		Set RootResources = oResourceFactory.NewList("")
-		
+
 		Set oSub = Nothing
 		FoundBool = False
-	
+
 		'Find resource
 		iTotalItems = RootResources.Count
 		For ItemCtr = 1 To iTotalItems
-				
+
 			If cstr(RootResources.Item(ItemCtr).ParentId) = cstr(RootFolderID) Then
-			
+
 				If InStr(RootResources.Item(ItemCtr).FileName, ".xls") > 0 Then
 					SheetIDs.add RootResources.Item(ItemCtr).ID
 				End If
-				
+
 			End If
-			
+
 		Next
-	
+
 		'Clean
 		Set RootResources = Nothing
 		Set oResourceFactory = Nothing
 		Set oTDC = Nothing
-		
+
 	Next
 
 	Set GetXLSFilesFromFolder = SheetIDs
