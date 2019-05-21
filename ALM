@@ -1,4 +1,3 @@
-
 '**********************************************************************
 ' Function Name: QCSetResource
 ' Purpose: To load a file into a known resource
@@ -10,86 +9,92 @@
 '   ParentPath
 ' Return: Resource ID
 ' Prerequisites: None
+' Location: https://github.com/Orasi/VBS-HP_UFT-Toolkit
+' Updated by: Tom Margrave at QualiTest Group
 '**********************************************************************
 Function QCSetResource(resourceFolderId,fileType,fileName,ParentPath)
-    'On Error Resume Next
-    Set TDConn = QCUtil.QCConnection
-    Set resourceFolderFactory = TDConn.QCResourceFolderFactory
-    Set resourceFolder = resourceFolderFactory.Item(resourceFolderId)
-    Set resourceFactory = resourceFolder.QCResourceFactory
-    Set currResourceList = resourceFactory.NewList("")
-    For ItemCount = 1 To currResourceList.Count
-        currItem = currResourceList.Item(ItemCount).Name
-        If UCase(currItem) = UCase(fileName) Then
-            Set resourceItem = currResourceList.Item(ItemCount)
-            resourceFound = True
-            Exit For
-        End If
-    Next
-    If Not resourceFound Then
+	'On Error Resume Next
+	Set TDConn = QCUtil.QCConnection
+	Set resourceFolderFactory = TDConn.QCResourceFolderFactory
+	Set resourceFolder = resourceFolderFactory.Item(resourceFolderId)
+	Set resourceFactory = resourceFolder.QCResourceFactory
+	Set currResourceList = resourceFactory.NewList("")
+	For ItemCount = 1 To currResourceList.Count
+		currItem = currResourceList.Item(ItemCount).Name
+		If UCase(currItem) = UCase(fileName) Then
+			Set resourceItem = currResourceList.Item(ItemCount)
+			resourceFound = True
+			Exit For
+		End If
+	Next
+	If Not resourceFound Then
 
-        Set resourceItem = resourceFactory.AddItem(CStr(fileName))
-        resourceItem. ResourceType= fileType
-        resourceItem.fileName = fileName
-        resourceItem.Post
+		Set resourceItem = resourceFactory.AddItem(CStr(fileName))
+		resourceItem. ResourceType= fileType
+		resourceItem.fileName = fileName
+		resourceItem.Post
 
-        Set currResourceList = resourceFactory.NewList("")
-        For ItemCount = 1 To currResourceList.Count
-            currItem = currResourceList.Item(ItemCount).Name
-             currItemID = currResourceList.Item(ItemCount).ID
-            If UCase(currItem) = UCase(fileName) Then
-                resourceFound = True
-                ID = currItemID
-                Set CI = currResourceList.Item(ItemCount)
-                Exit For
-            End If
-        Next
-        If resourceFound Then
-    		Set resourceItem = Nothing
-            Set currResourceList = Nothing
-		    Set TDConn = Nothing
-		    Set resourceFolderFactory = Nothing
-		    Set resourceFolder = Nothing
-		    Set resourceFactory = Nothing
-		    Set currResourceList = Nothing
+		Set currResourceList = resourceFactory.NewList("")
+		For ItemCount = 1 To currResourceList.Count
+			currItem = currResourceList.Item(ItemCount).Name
+				currItemID = currResourceList.Item(ItemCount).ID
+			If UCase(currItem) = UCase(fileName) Then
+				resourceFound = True
+				ID = currItemID
+				Set CI = currResourceList.Item(ItemCount)
+				Exit For
+			End If
+		Next
+		If resourceFound Then
+			Set resourceItem = Nothing
+			Set currResourceList = Nothing
+			Set TDConn = Nothing
+			Set resourceFolderFactory = Nothing
+			Set resourceFolder = Nothing
+			Set resourceFactory = Nothing
+			Set currResourceList = Nothing
 			Wait(2)
-            CI.Filename = fileName
-            CI.ResourceType= fileType
-            CI.Post
-            Wait(1)
-            CI.VC.CheckOut ""
+			CI.Filename = fileName
+			CI.ResourceType= fileType
+			CI.Post
 			Wait(1)
-            CI.UploadResource ParentPath, True
-            Wait(2)
-            CI.VC.CheckIn "Automated check-in by utility"  & Now()
-        Else
-             Reporter.ReportEvent micFail, "Resource Upload", "Resource could not be uploaded."
-        End If
-    Else
-        resourceItem.vC.CheckOut ""
-        Set testResourceStorage = resourceItem
-        ID = resourceItem.ID
-        testResourceStorage.UploadResource ParentPath, False
-        resourceItem.vC.CheckIn "Automated check-in by utility" & Now()
-    End If
-    Set resourceItem = Nothing
-    Set currResourceList = Nothing
-    Set TDConn = Nothing
-    Set resourceFolderFactory = Nothing
-    Set resourceFolder = Nothing
-    Set resourceFactory = Nothing
-    Set currResourceList = Nothing
+			CI.VC.CheckOut ""          
+			Wait(1)
+			CI.UploadResource ParentPath, True
+			Wait(2)
+			CI.VC.CheckIn "Automated check-in by utility"  & Now()
+		Else
+				Reporter.ReportEvent micFail, "Resource Upload", "Resource could not be uploaded."
+		End If
+	Else
+		resourceItem.vC.CheckOut ""
+		Set testResourceStorage = resourceItem
+		ID = resourceItem.ID
+		testResourceStorage.UploadResource ParentPath, False
+		resourceItem.vC.CheckIn "Automated check-in by utility" & Now()
+	End If
+	Set resourceItem = Nothing
+				 Set currResourceList = Nothing
+			Set TDConn = Nothing
+			Set resourceFolderFactory = Nothing
+			Set resourceFolder = Nothing
+			Set resourceFactory = Nothing
+			Set currResourceList = Nothing
   	QCSetResource = ID
 End Function
 
+
 '**********************************************************************
 ' Function Name: UploadAttachment
+' Author: Adam Thomas
 ' Purpose: Uploads an attachment to the current test
 ' Author: Adam Thomas at Orasi Software Inc.
 ' Input:
 '   FilePath
 ' Return: none
 ' Prerequisites: None
+' Location: https://github.com/Orasi/VBS-HP_UFT-Toolkit
+' Updated by: Tom Margrave at QualiTest Group
 '**********************************************************************
 Function UploadAttachment(FilePath)
 	Set ObjCurrentTest = QCUtil.CurrentTestSetTest.Attachments
@@ -100,21 +105,27 @@ Function UploadAttachment(FilePath)
 	ObjAttch.Refresh
 End Function
 
+
 '**********************************************************************
 ' Function Name: GetCurrentTestID
+' Author: Adam Thomas
 ' Purpose: To return the ALM Test id for the test currently executing
 ' Author:  Adam Thomas at Orasi Software Inc.
 ' Input: None
 ' Return: Test ID
 ' Prerequisites:
+' Location: https://github.com/Orasi/VBS-HP_UFT-Toolkit
+' Updated by: Tom Margrave at QualiTest Group
 '**********************************************************************
 Function GetCurrentTestID()
 	Set CurrenttestID = QCUtil.CurrentTest
 	GetCurrentTestID = CurrenttestID.ID
 End Function
 
+
 '**********************************************************************
 ' Function Name: UploadResource
+' Author: Adam Thomas
 ' Purpose: Uploads a file to a given resource ID. Resource path is the
 '   full path including file name and extension.
 ' Author: Adam Thomas at Orasi Software Inc.
@@ -123,10 +134,12 @@ End Function
 '   ResourceID
 ' Return: none
 ' Prerequisites: None
+' Location: https://github.com/Orasi/VBS-HP_UFT-Toolkit
+' Updated by: Tom Margrave at QualiTest Group
 '**********************************************************************
-Public  Function UploadResource(ResourcePath,ResourceID)
+Function UploadResource(ResourcePath,ResourceID)  
    'Declare
-    Dim aName
+	Dim aName
 	Dim FoundBool
 	Dim oTDC
 	Dim oResourceFactory
@@ -189,6 +202,7 @@ End Function
 
 '**********************************************************************
 ' Function Name: DownloadAttachmentFromTest
+' Author: Adam Thomas
 ' Purpose: Downloads an attachment from any test to a local/network path
 ' Author:  Adam Thomas at Orasi Software Inc.
 ' Input:
@@ -199,29 +213,33 @@ End Function
 ' Prerequisites:
 '   Method CopyFile This is in the FileSystem Library
 '   Method GetAttachmentFromTestObject This is in the ALM Library
+' Location: https://github.com/Orasi/VBS-HP_UFT-Toolkit
+' Updated by: Tom Margrave at QualiTest Group
 '**********************************************************************
-Public Function DownloadAttachmentFromTest(ByVal TestID, ByVal FileName, ByVal OutPath)
+Function DownloadAttachmentFromTest(ByVal TestID, ByVal FileName, ByVal OutPath)
 	If InStr(FileName, "\") > 0 Then
 		DownloadAttachmentFromTest = CopyFile(FileName, "Temp")
 	Else
 		Dim TDConnection
 		Set TDConnection = QCUtil.TDConnection
-
+	
 		Dim TestList
 		Set TestList = TDConnection.TestFactory.NewList("SELECT * FROM TEST WHERE TS_TEST_ID = " & TestID)
-
+	
 		' For use with test name: Set TestList = TDConnection.TestFactory.NewList("SELECT * FROM TEST WHERE TS_NAME = '" & TestName & "'")
-
+	
 		If UCase(OutPath) = "TEMP" Then
 			OutPath = GetSystemTempFolder
 		End If
-
+		
 		DownloadAttachmentFromTest = GetAttachmentFromTestObject(TestList(1), FileName, OutPath)
 	End If
 End Function
 
+
 '**********************************************************************
 ' Function Name: RenameAttachmentFromTest
+' Author: Adam Thomas
 ' Purpose: QUESTION Purpose Function Name: RenameAttachmentFromTest
 ' Author: Adam Thomas at Orasi Software Inc.
 ' Input:
@@ -237,8 +255,10 @@ End Function
 '   Method RemoveAttachmentFromTest This is in the ALM Library
 '   Method UploadAttachmentToTest This is in the ALM Library
 '   Method DeleteFileByPath This is in the Filesystem Library
+' Location: https://github.com/Orasi/VBS-HP_UFT-Toolkit
+' Updated by: Tom Margrave at QualiTest Group
 '**********************************************************************
-Public Function RenameAttachmentFromTest(ByVal TestID, ByVal CurrentAttachmentName, ByVal NewAttachmentName)
+Function RenameAttachmentFromTest(ByVal TestID, ByVal CurrentAttachmentName, ByVal NewAttachmentName)
 
 	TempPath = GetSystemTempFolder()
 	SuccessFlag = FALSE
@@ -249,28 +269,29 @@ Public Function RenameAttachmentFromTest(ByVal TestID, ByVal CurrentAttachmentNa
 	TempAttachmentPath = DownloadAttachmentFromTest(TestID, CurrentAttachmentName, TempPath)
 
 	If TempAttachmentPath <> "" Then
-
+			
 		'rename file
 		NewPath = RenameFile(TempPath & CurrentAttachmentName, NewAttachmentName)
-
+		
 		'delete from test plan
 		RemoveAttachmentFromTest TestID, CurrentAttachmentName
-
+		 
 		'upload renamed to test plan
-		UploadAttachmentToTest TestID, NewPath
-
+		UploadAttachmentToTest TestID, NewPath 
+		
 		'delete local
 		DeleteFileByPath(NewPath)
-
+		
 		SuccessFlag = TRUE
-
+		
 	End If
 	RenameAttachmentFromTest = SuccessFlag
-
 End Function
+
 
 '**********************************************************************
 ' Function Name: GetAttachmentFromTestObject
+' Author: Adam Thomas
 ' Purpose: Downloads an attachment from an ALM object
 ' Author: Adam Thomas at Orasi Software Inc.
 ' Input:
@@ -279,14 +300,16 @@ End Function
 '   ByVal OutPath
 ' Return: String of the output file
 ' Prerequisites: None
+' Location: https://github.com/Orasi/VBS-HP_UFT-Toolkit
+' Updated by: Tom Margrave at QualiTest Group
 '**********************************************************************
-Public Function GetAttachmentFromTestObject(ByRef Object, ByVal FileName, ByVal OutPath)
-    Dim strRetVal
-    strRetVal = ""
+Function GetAttachmentFromTestObject(ByRef Object, ByVal FileName, ByVal OutPath)
+	Dim strRetVal
+	strRetVal = ""
 
-    Dim AttachmentFactory, AttachmentList
-    Set AttachmentFactory = Object.Attachments
-    Set AttachmentList = AttachmentFactory.NewList("")
+Dim AttachmentFactory, AttachmentList
+Set AttachmentFactory = Object.Attachments
+Set AttachmentList = AttachmentFactory.NewList("")
 
     'Ensure path ends with "\"
     If Right(OutPath, 1) <> "\" Then
@@ -316,8 +339,10 @@ Public Function GetAttachmentFromTestObject(ByRef Object, ByVal FileName, ByVal 
     GetAttachmentFromTestObject = strRetVal
 End Function
 
+
 '**********************************************************************
 ' Function Name: UploadAttachmentToTest
+' Author: Adam Thomas
 ' Purpose: Uploads an attachment to any test from a local/network path
 ' Author: Adam Thomas at Orasi Software Inc.
 ' Input:
@@ -325,8 +350,10 @@ End Function
 '   ByVal LocalPath
 ' Return: none
 ' Prerequisites: None
+' Location: https://github.com/Orasi/VBS-HP_UFT-Toolkit
+' Updated by: Tom Margrave at QualiTest Group
 '**********************************************************************
-Public Function UploadAttachmentToTest(ByVal TestID, ByVal LocalPath)
+Function UploadAttachmentToTest(ByVal TestID, ByVal LocalPath)
 
 	Dim TDConnection
 	Set TDConnection = QCUtil.TDConnection
@@ -336,10 +363,10 @@ Public Function UploadAttachmentToTest(ByVal TestID, ByVal LocalPath)
 	Set TestList = TDConnection.TestFactory.NewList("SELECT * FROM TEST WHERE TS_TEST_ID = " & TestID)
 
 ' For use with test name: Set TestList = TDConnection.TestFactory.NewList("SELECT * FROM TEST WHERE TS_NAME = '" & TestName & "'")
-
-	Set ObjAttch = TestList(1).Attachments
+	
+	Set ObjAttch = TestList(1).Attachments 
 	Set Attacher = ObjAttch.AddItem(null)
-
+	
 	Attacher.FileName = FilePath
 	Attacher.Type = 1
 	Attacher.Post
@@ -347,22 +374,27 @@ Public Function UploadAttachmentToTest(ByVal TestID, ByVal LocalPath)
 
 End Function
 
+
 '**********************************************************************
 ' Function Name: GetTestNameFromID
+' Author: Adam Thomas
 ' Purpose: Gets the name of the test from the test ID
 ' Author: Adam Thomas at Orasi Software Inc.
 ' Input:
 '   ALMTestID
 ' Return: String Test
 ' Prerequisites: None
+' Location: https://github.com/Orasi/VBS-HP_UFT-Toolkit
+' Updated by: Tom Margrave at QualiTest Group
 '**********************************************************************
-Public Function GetTestNameFromID(ALMTestID)
+Function GetTestNameFromID(ALMTestID)
 	Dim TDConnection
 	Set TDConnection = QCUtil.TDConnection
 	Dim TestList
 	Set TestList = TDConnection.TestFactory.NewList("SELECT * FROM TEST WHERE TS_TEST_ID = " & ALMTestID )
 	GetTestNameFromID = TestList(1).Name
 End Function
+
 
 '**********************************************************************
 ' Function Name: RemoveAttachmentFromTest
@@ -373,8 +405,10 @@ End Function
 '   ByVal Filename
 ' Return: None
 ' Prerequisites: Nonw
+' Location: https://github.com/Orasi/VBS-HP_UFT-Toolkit
+' Updated by: Tom Margrave at QualiTest Group
 '**********************************************************************
-Public Function RemoveAttachmentFromTest(ByVal TestID, ByVal Filename)
+Function RemoveAttachmentFromTest(ByVal TestID, ByVal Filename)
 
 	Dim TDConnection
 	Set TDConnection = QCUtil.TDConnection
@@ -403,13 +437,15 @@ End Function
 
 
 '**********************************************************************
-' Function Name: QCGetResource
+' Author: Adam Thomas
 ' Purpose: Downloads a resource by resource ID
 ' Author: Adam Thomas at Orasi Software Inc.
 ' Input:
 '   resourceID
 ' Return: string path
 ' Prerequisites: None
+' Location: https://github.com/Orasi/VBS-HP_UFT-Toolkit
+' Updated by: Tom Margrave at QualiTest Group
 '**********************************************************************
 Function QCGetResource(resourceID)
 
@@ -423,8 +459,8 @@ Function QCGetResource(resourceID)
 
 	Set objShell = CreateObject("WScript.Shell")
 	Set colEnvironment = objShell.Environment("PROCESS")
-
-
+	
+	
 	objPath = GetSystemTempFolder()
 
 	If oResourceList.Count = 1 Then
@@ -453,6 +489,7 @@ Function QCGetResource(resourceID)
 
 End Function
 
+
 '**********************************************************************
 ' Function Name: GetTestNameFromID
 ' Purpose: Returns the name of a test with a given test ID.
@@ -461,8 +498,11 @@ End Function
 '   ALMTestID
 ' Return: String Name
 ' Prerequisites: None
+' Purpose: Returns the name of a test with a given test ID. 
+' Location: https://github.com/Orasi/VBS-HP_UFT-Toolkit
+' Updated by: Tom Margrave at QualiTest Group
 '**********************************************************************
-Public Function GetTestNameFromID(ALMTestID)
+Function GetTestNameFromID(ALMTestID)
 	Dim TDConnection
 	Set TDConnection = QCUtil.TDConnection
 	Dim TestList
@@ -481,55 +521,59 @@ End Function
 '   Depth
 ' Return: ArrayList
 ' Prerequisites: None
+' Purpose: Returns an array list of sub folder IDs belonging to all parent folder ids given
+' Location: https://github.com/Orasi/VBS-HP_UFT-Toolkit
+' Updated by: Tom Margrave at QualiTest Group
 '**********************************************************************
 Function FindAllSubFolders(RootFolderIDs, Depth)
-
+	
 	Set FoldersToScanCurrently = CreateObject( "System.Collections.ArrayList")
 	Set FoldersToScanNext = CreateObject( "System.Collections.ArrayList")
 	Set FoldersFound = CreateObject( "System.Collections.ArrayList")
-
-
+	
+	
 	'Set root folders up
 	aRootFolderIDs = Split(RootFolderIDs, ",")
 	For each RootFolderID in aRootFolderIDs
 		FoldersToScanCurrently.add Trim(RootFolderID)
 	Next
-
+	
 	Set oTDC = QCUtil.QCConnection
 	Set oResourceFolder = oTDC.QCResourceFolderFactory
-
-
+	
+	
 	For d = 1 To Depth
 		family = 0
-
+		
 		For Each folder in FoldersToScanCurrently
 			FoldersFound.add folder
-			Set Temp = GetChildren(Folder)
-
+			Set Temp = GetChildren(Folder) 
+			
 			For each item in Temp
 				FoldersToScanNext.Add item
 			Next
-
+			
 			family = family + Temp.Count
 			Temp.Clear()
 		Next
-
+		
 		FoldersToScanCurrently.Clear()
-
+		
 		For Each item in FoldersToScanNext
 			FoldersToScanCurrently.Add item
 		Next
-
+	
 		FoldersToScanNext.Clear()
-
+		
 		If Family = 0 Then
 			Exit For
 		End If
-
+	
 	Next
 
 	Set FindAllSubFolders = FoldersFound
 End Function
+
 
 '**********************************************************************
 ' Function Name: GetChildren
@@ -540,26 +584,29 @@ End Function
     'RootID'
 ' Return: ArrayList of children
 ' Prerequisites: None
+' Location: https://github.com/Orasi/VBS-HP_UFT-Toolkit
+' Updated by: Tom Margrave at QualiTest Group
 '**********************************************************************
 Function GetChildren(RootID)
 
 		Set Children = CreateObject( "System.Collections.ArrayList")
-
+		
 		Set oTDC = QCUtil.QCConnection
 		Set oResourceFolder = oTDC.QCResourceFolderFactory
-
+	
 		Set Root = oResourceFolder.item(RootID)
 		Set ChildrenFolders = Root.QCResourceFolderFactory.NewList("")
-
+		
 		ChildrenCount = ChildrenFolders.Count
-
+		
 		For f = 1 To ChildrenCount Step 1
 			Children.add ChildrenFolders.Item(f).ID
 		Next
-
+		
 		Set GetChildren = Children
-
+		
 End Function
+
 
 '**********************************************************************
 ' Function Name: GetXLSFilesFromFolder
@@ -570,9 +617,10 @@ End Function
 '   aRootFolderIDs
 ' Return: ArrayList
 ' Prerequisites: None
+' Location: https://github.com/Orasi/VBS-HP_UFT-Toolkit
+' Updated by: Tom Margrave at QualiTest Group
 '**********************************************************************
 Function GetXLSFilesFromFolder(aRootFolderIDs)
-
 	Dim aName
 	Dim FoundBool
 	Dim oTDC
@@ -584,52 +632,52 @@ Function GetXLSFilesFromFolder(aRootFolderIDs)
 	Dim CurItem
 	Dim FileName
 	Set SheetIDs = CreateObject( "System.Collections.ArrayList" )
-
+	
 	If NOT(QCUtil.isConnected) Then
 		Reporter.ReportEvent micFail, "Not Connected to QC", "QTP isn't connected to QC and can't download the file"
 		QCImport = False
 			'Exit Function
 	End If
 
-
+	
 	Set oTDC = QCUtil.QCConnection
 	Set oResourceFolder = oTDC.QCResourceFolderFactory
-
+	
 	For each RootFolderID in aRootFolderIDs
-
+			
 		RootFolderID = Trim(RootFolderID)
-
+	
 		'Checks QC connectivity
 
 		'Set oResourceFactory = oTDC.QCResourceFactory
-
-
+		
+		
 		Set Root = oResourceFolder.item(RootFolderID)
 		Set oResourceFactory = Root.QCResourceFactory
 		Set RootResources = oResourceFactory.NewList("")
-
+		
 		Set oSub = Nothing
 		FoundBool = False
-
+	
 		'Find resource
 		iTotalItems = RootResources.Count
 		For ItemCtr = 1 To iTotalItems
-
+				
 			If cstr(RootResources.Item(ItemCtr).ParentId) = cstr(RootFolderID) Then
-
+			
 				If InStr(RootResources.Item(ItemCtr).FileName, ".xls") > 0 Then
 					SheetIDs.add RootResources.Item(ItemCtr).ID
 				End If
-
+				
 			End If
-
+			
 		Next
-
+	
 		'Clean
 		Set RootResources = Nothing
 		Set oResourceFactory = Nothing
 		Set oTDC = Nothing
-
+		
 	Next
 
 	Set GetXLSFilesFromFolder = SheetIDs

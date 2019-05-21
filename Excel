@@ -13,7 +13,7 @@ End Function
 
 
 Class Excel
-    Private objExcel
+	Private objExcel
 	Private objWorkbook
 	Private objSheet
 	
@@ -64,7 +64,7 @@ Class Excel
 			RC = r.Row & "," & r.Column
 		On Error GoTo 0
 		If RC <> "" Then
-	        Select Case UCase(RowOrCol)
+		    Select Case UCase(RowOrCol)
 			Case "ROW"
 				Find = r.Row
 			Case "COL"
@@ -74,7 +74,7 @@ Class Excel
 			End Select
 		Else 
 			Reporter.ReportEvent micWarning, "Excel Find Function", "Excel could not find a value of: " & SearchString & " in the given range of: " & Range
-	    	Find = 0
+			Find = 0
 		End If
 	End Function
 	
@@ -119,14 +119,14 @@ Class Excel
 	Public Function FindFirstEmptyRow(ColumnLetter)
 		Range = UCase(ColumnLetter) & "1:" & UCase(ColumnLetter) & 64000
 		Set r = objExcel.Range(Range).Find("")
-    	FindFirstEmptyRow = r.Row
+		FindFirstEmptyRow = r.Row
 	End Function
 	
 	Public Function FindFirstEmptyCol(RowNumber)
 		Range = UCase(ColumnLetter) & "1:" & UCase(ColumnLetter) & 64000
 		Range = "A" & RowNumber & ":" & "ZZ" & RowNumber
 		Set r = objExcel.Range(Range).Find("")
-    	FindFirstEmptyCol = r.Column
+		FindFirstEmptyCol = r.Column
 	End Function
 	
 	Function GetCellData(Row, Col)
@@ -280,11 +280,13 @@ End Function
 '-------------------------------------------OLD Excel Functions------------------------------
 
 '**********************************************************************
-' Function Name:	  	ExcellFind
-' Author:						Adam Thomas
-' Purpose:					Returns a cell location, as an R,C e.g 5,3 or E,3 , for the given search. 
-'							Example of range would be: A1:ZZ1 for top row or A1:ZZ10000 for whole sheet or C1:C10000 for a column
-' Prerequisites:		
+' Function Name: ExcellFind
+' Author: 	Adam Thomas
+' Purpose: Returns a cell location, as an R,C e.g 5,3 or E,3 , for the given search. 
+'		Example of range would be: A1:ZZ1 for top row or A1:ZZ10000 for whole sheet or C1:C10000 for a column
+' Prerequisites: 
+' Location: https://github.com/Orasi/VBS-HP_UFT-Toolkit
+' Updated by: Tom Margrave at QualiTest Group
 '**********************************************************************
 Function ExcelFind(FilePath, Sheet, SearchString, Range, RowOrCol)
 	Set objExcel = CreateObject("Excel.Application")
@@ -302,7 +304,7 @@ Function ExcelFind(FilePath, Sheet, SearchString, Range, RowOrCol)
 		RC = r.Row & "," & r.Column
 	On Error GoTo 0
 	If RC <> "" Then
-        Select Case UCase(RowOrCol)
+		Select Case UCase(RowOrCol)
 		Case "ROW", "R"
 			ExcelFind = r.Row
 		Case "COL", "C", "COLUMN"
@@ -311,7 +313,7 @@ Function ExcelFind(FilePath, Sheet, SearchString, Range, RowOrCol)
 			ExcelFind = RC
 		End Select
 	Else 
-    	ExcelFind = 0
+		ExcelFind = 0
 	End If
 	objWorkbook.Close
 	Set objExcel = Nothing
@@ -324,10 +326,12 @@ ExcelGetByColumnName = ExcelGet(FilePath, Sheet, Row, Col)
 End Function
 
 '**********************************************************************
-' Function Name:	  	ExcelGet
-' Author:					   Adam Thomas
-' Purpose:					Returns a cell value 
-' Prerequisites:		
+' Function Name: ExcelGet
+' Author:    Adam Thomas
+' Purpose: Returns a cell value 
+' Prerequisites: 
+' Location: https://github.com/Orasi/VBS-HP_UFT-Toolkit
+' Updated by: Tom Margrave at QualiTest Group
 '**********************************************************************
 Function ExcelGet(FilePath, Sheet, Row, Col)
 	Set objExcel = CreateObject("Excel.Application")
@@ -349,10 +353,10 @@ Function ExcelGet(FilePath, Sheet, Row, Col)
  End Function
  
  '**********************************************************************
-' Function Name:	  	ExcelPut
-' Author:				Adam Thomas
-' Purpose:				Sets a cell value 
-' Prerequisites:		
+' Function Name: ExcelPut
+' Author: Adam Thomas
+' Purpose: Sets a cell value 
+' Prerequisites: 
 '**********************************************************************
  Function ExcelPut(FilePath, Sheet, ValueToAdd, Row, Col)
    	Set objExcel = CreateObject("Excel.Application")
@@ -372,10 +376,10 @@ Function ExcelGet(FilePath, Sheet, Row, Col)
 End Function
 
 '**********************************************************************
-' Function Name:	  	ExcellFindFast
-' Author:						Adam Thomas
-' Purpose:					Returns a cell location, as an R,C e.g 5,3 or E,3 , for the given search. 
-' Prerequisites:		' Prerequisites:		Must use ExcelOn and ExcelOff functions 
+' Function Name: ExcellFindFast
+' Author: 	Adam Thomas
+' Purpose: Returns a cell location, as an R,C e.g 5,3 or E,3 , for the given search. 
+' Prerequisites: ' Prerequisites: Must use ExcelOn and ExcelOff functions 
 '**********************************************************************
 Public Function ExcelFindFast(SearchString, Range, RowOrCol)
 	Set r = objExcel.Range(Range).Find(SearchString)
@@ -383,7 +387,7 @@ Public Function ExcelFindFast(SearchString, Range, RowOrCol)
 		RC = r.Row & "," & r.Column
 	On Error GoTo 0
 	If RC <> "" Then
-        Select Case UCase(RowOrCol)
+		Select Case UCase(RowOrCol)
 		Case "ROW"
 			ExcelFindFast = r.Row
 		Case "COL"
@@ -392,15 +396,15 @@ Public Function ExcelFindFast(SearchString, Range, RowOrCol)
 			ExcelFindFast = RC
 		End Select
 	Else 
-    	ExcelFindFast = 0
+		ExcelFindFast = 0
 	End If
 End Function
 
  '**********************************************************************
-' Function Name:	  	?????????
-' Author:				Adam Thomas
-' Purpose:					 
-' Prerequisites:		
+' Function Name: ?????????
+' Author: Adam Thomas
+' Purpose:  
+' Prerequisites: 
 '***********************************************************************
 Public Function ExcelFindColumnFast(ColumnName)
 	Set r = objExcel.Range("A1:A1000").Find(ColumnName)
@@ -410,15 +414,15 @@ Public Function ExcelFindColumnFast(ColumnName)
 	If RC <> "" Then
 		ExcelFindColumnFast = r.Column
 	Else 
-    	ExcelFindColumnFast = 0
+		ExcelFindColumnFast = 0
 	End If
 End Function
 
  '**********************************************************************
-' Function Name:	  	?????????
-' Author:				Adam Thomas
-' Purpose:					 
-' Prerequisites:		
+' Function Name: ?????????
+' Author: Adam Thomas
+' Purpose:  
+' Prerequisites: 
 '***********************************************************************
 Public Function ExcelFindFirstEmptyRowFast(ColumnLetter)
 	Set r = objExcel.Range(ColumnLetter&"1:"&ColumnLetter&"65000").Find("")
@@ -428,10 +432,10 @@ Public Function ExcelFindFirstEmptyRowFast(ColumnLetter)
 End Function
 
  '**********************************************************************
-' Function Name:	  	?????????
-' Author:				Adam Thomas
-' Purpose:					 
-' Prerequisites:		
+' Function Name: ?????????
+' Author: Adam Thomas
+' Purpose:  
+' Prerequisites: 
 '***********************************************************************
 Public Function ExcelWriteNextLineFast(ColumnName, Row, ValueToAdd)
 	Col = ExcelFindFast(ColumnName, "A1:BZ1","Col")
@@ -439,10 +443,12 @@ Public Function ExcelWriteNextLineFast(ColumnName, Row, ValueToAdd)
 End Function
 
  '**********************************************************************
-' Function Name:	  	?????????
-' Author:				Adam Thomas
-' Purpose:					 
-' Prerequisites:		
+' Function Name: ?????????
+' Author: Adam Thomas
+' Purpose:  
+' Prerequisites: 
+' Location: https://github.com/Orasi/VBS-HP_UFT-Toolkit
+' Updated by: Tom Margrave at QualiTest Group
 '***********************************************************************
 Public Function ExcelPutFast(ValueToAdd, Row, Col)
 	objSheet.Cells(Row, Col) = ValueToAdd
@@ -450,20 +456,24 @@ Public Function ExcelPutFast(ValueToAdd, Row, Col)
 End Function
 
  '**********************************************************************
-' Function Name:	  	?????????
-' Author:				Adam Thomas
-' Purpose:					 
-' Prerequisites:		
+' Function Name: ?????????
+' Author: Adam Thomas
+' Purpose:  
+' Prerequisites:
+' Location: https://github.com/Orasi/VBS-HP_UFT-Toolkit
+' Updated by: Tom Margrave at QualiTest Group 
 '***********************************************************************
 Public Function ExcelSaveFast()
    objWorkbook.Save
 End Function
 
 '**********************************************************************
-' Function Name:	  	ExcelGetFast
-' Author:					   Adam Thomas
-' Purpose:					Returns a cell value 
-' Prerequisites:		Must use ExcelOn and ExcelOff functions 
+' Function Name: ExcelGetFast
+' Author:    Adam Thomas
+' Purpose: Returns a cell value 
+' Prerequisites: Must use ExcelOn and ExcelOff functions 
+' Location: https://github.com/Orasi/VBS-HP_UFT-Toolkit
+' Updated by: Tom Margrave at QualiTest Group
 '**********************************************************************
 Function ExcelGetFast(Row, Col)
    If CStr(Col) <> "0" and CStr(Row) <> "0" Then
@@ -474,21 +484,25 @@ Function ExcelGetFast(Row, Col)
 End Function
 
  '**********************************************************************
-' Function Name:	  	?????????
-' Author:				Adam Thomas
-' Purpose:					 
-' Prerequisites:		
-'***********************************************************************
+' Function Name: ?????????
+' Author: Adam Thomas
+' Purpose:  
+' Prerequisites: 
+' Location: https://github.com/Orasi/VBS-HP_UFT-Toolkit
+' Updated by: Tom Margrave at QualiTest Group
+'**********************************************************************
 Function ExcelGetCurrentSheetFast()
 	ExcelGetCurrentSheetFast = objSheet.Name
 End Function
 
  '**********************************************************************
-' Function Name:	  	?????????
-' Author:				Adam Thomas
-' Purpose:					 
-' Prerequisites:		
-'***********************************************************************
+' Function Name: ?????????
+' Author: Adam Thomas
+' Purpose:  
+' Prerequisites: 
+' Location: https://github.com/Orasi/VBS-HP_UFT-Toolkit
+' Updated by: Tom Margrave at QualiTest Group
+'**********************************************************************
 Function ExcelSwitchSheetFast(Sheet)
 	Set objSheet = Nothing
 	objWorkbook.sheets(Sheet).Activate
@@ -496,11 +510,13 @@ Function ExcelSwitchSheetFast(Sheet)
 End Function
 
  '**********************************************************************
-' Function Name:	  	?????????
-' Author:				Adam Thomas
-' Purpose:					 
-' Prerequisites:		
-'***********************************************************************
+' Function Name: ?????????
+' Author: Adam Thomas
+' Purpose:  
+' Prerequisites: 
+' Location: https://github.com/Orasi/VBS-HP_UFT-Toolkit
+' Updated by: Tom Margrave at QualiTest Group
+'**********************************************************************
 Function ExcelOn(FilePath, Sheet)
    	Set objExcel = CreateObject("Excel.Application")
 	objExcel.Visible = False
@@ -516,11 +532,13 @@ Function ExcelOn(FilePath, Sheet)
 End Function
 
  '**********************************************************************
-' Function Name:	  	?????????
-' Author:				Adam Thomas
-' Purpose:					 
-' Prerequisites:		
-'***********************************************************************
+' Function Name: ?????????
+' Author: Adam Thomas
+' Purpose:  
+' Prerequisites: 
+' Location: https://github.com/Orasi/VBS-HP_UFT-Toolkit
+' Updated by: Tom Margrave at QualiTest Group
+'**********************************************************************
 Function ExcelOnVisible(FilePath, Sheet)
    	Set objExcel = CreateObject("Excel.Application")
 	objExcel.Visible = True
@@ -534,11 +552,13 @@ Function ExcelOnVisible(FilePath, Sheet)
 End Function
 
  '**********************************************************************
-' Function Name:	  	ExcelOff
-' Author:				Adam Thomas
-' Purpose:					 
-' Prerequisites:		
-'***********************************************************************
+' Function Name: ExcelOff
+' Author: Adam Thomas
+' Purpose:  
+' Prerequisites: 
+' Location: https://github.com/Orasi/VBS-HP_UFT-Toolkit
+' Updated by: Tom Margrave at QualiTest Group
+'**********************************************************************
 Function ExcelOff
    	objWorkbook.Close
 	Set objExcel = Nothing
@@ -547,11 +567,13 @@ Function ExcelOff
 End Function
 
  '**********************************************************************
-' Function Name:	  	GetSheetNames
-' Author:				Adam Thomas
-' Purpose:				Returns an array of all worksheet names within a givein workbook	 
-' Prerequisites:		
-'***********************************************************************
+' Function Name: GetSheetNames
+' Author: Adam Thomas
+' Purpose: Returns an array of all worksheet names within a givein workbook	 
+' Prerequisites: 
+' Location: https://github.com/Orasi/VBS-HP_UFT-Toolkit
+' Updated by: Tom Margrave at QualiTest Group
+'**********************************************************************
 Function GetSheetNames(FilePath)
 
 	Set objXL = CreateObject("Excel.Application")
@@ -578,10 +600,12 @@ End Function
 
  
  '**********************************************************************
-' Function Name:	  	ColLtr
-' Author:				Adam Thomas
-' Purpose:				Converts a column number to a column letter 
-' Prerequisites:		
+' Function Name: ColLtr
+' Author: Adam Thomas
+' Purpose: Converts a column number to a column letter 
+' Prerequisites: 
+' Location: https://github.com/Orasi/VBS-HP_UFT-Toolkit
+' Updated by: Tom Margrave at QualiTest Group
 '**********************************************************************
 Function ConvertToLetter(mycolumn)
 	If mycolumn > 26 Then
